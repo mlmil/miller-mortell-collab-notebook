@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mortell-Miller Collab Notebook</title>
+<style>
+  :root {
+    --bg: #0E1117;
+    --surface: #161B27;
+    --surface2: #1E2535;
+    --surface3: #252D40;
+    --accent: #4A9EDB;
+    --accent-dim: #1D3A57;
+    --green: #2ECC71;
+    --green-dim: #0D3320;
+    --green-badge: #163D25;
+    --amber: #F0A500;
+    --amber-dim: #3A2800;
+    --red: #E05252;
+    --red-dim: #3A1010;
+    --border: #2A3248;
+    --text: #E8ECF4;
+    --muted: #7A8499;
+    --muted2: #5A6278;
+    --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; }
+
+  /* NAV */
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+  .nav-title { color: var(--white); font-size: 18px; font-weight: 700; letter-spacing: .3px; }
+  .nav-title span { color: var(--muted); font-weight: 400; }
+  .nav-links { display: flex; gap: 6px; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 13px; padding: 5px 12px; border-radius: 4px; transition: background .15s; }
+  .nav-links a:hover { background: var(--surface3); color: var(--text); }
+  .updated { color: var(--muted2); font-size: 12px; }
+
+  /* LAYOUT */
+  .container { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+
+  /* MOMENTUM BANNER */
+  .momentum-banner { background: var(--green-dim); border: 1px solid #1A5E38; border-radius: 10px; padding: 22px 28px; margin-bottom: 28px; color: var(--text); }
+  .momentum-banner h2 { font-size: 17px; font-weight: 700; margin-bottom: 14px; letter-spacing: .2px; display: flex; align-items: center; gap: 8px; color: var(--green); }
+  .momentum-banner h2::before { content: '★'; font-size: 14px; }
+  .momentum-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .m-card { background: rgba(255,255,255,.05); border: 1px solid rgba(46,204,113,.15); border-radius: 7px; padding: 14px 16px; }
+  .m-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin-bottom: 4px; }
+  .m-card .value { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text); }
+  .m-card .sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  /* SECTION */
+  section { margin-bottom: 32px; }
+  .section-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .section-hdr h2 { font-size: 16px; font-weight: 700; color: var(--text); }
+  .section-hdr .count { background: var(--surface3); color: var(--muted); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+
+  /* TASKS */
+  .tasks-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  .tasks-table th { background: var(--surface2); color: var(--muted); text-align: left; padding: 11px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
+  .tasks-table td { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: top; color: var(--text); }
+  .tasks-table tr:last-child td { border-bottom: none; }
+  .tasks-table tr:hover td { background: var(--surface2); }
+  .owner-mike { background: var(--accent-dim); color: var(--accent); padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .owner-art { background: #2D1A4A; color: #B07EE8; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .owner-momentum { background: var(--green-badge); color: var(--green); padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .due-urgent { color: var(--red); font-weight: 700; font-size: 13px; }
+  .due-soon { color: var(--amber); font-weight: 600; font-size: 13px; }
+  .due-normal { color: var(--muted); font-size: 13px; }
+  .task-done { text-decoration: line-through; color: var(--muted2); }
+  .priority-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; flex-shrink: 0; }
+  .p-high { background: var(--red); }
+  .p-med { background: var(--amber); }
+  .p-low { background: var(--muted2); }
+
+  /* IDEAS */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-btn { padding: 5px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--surface); color: var(--muted); font-size: 13px; cursor: pointer; transition: all .15s; font-weight: 500; }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+  .ideas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  .idea-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; border-top: 3px solid transparent; transition: transform .15s, box-shadow .15s; }
+  .idea-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.35); border-color: var(--surface3); }
+  .idea-card.status-active { border-top-color: var(--green); }
+  .idea-card.status-momentum { border-top-color: var(--green); }
+  .idea-card.status-queued { border-top-color: var(--accent); }
+  .idea-card.status-parked { border-top-color: var(--muted2); }
+  .idea-card.status-assigned { border-top-color: var(--amber); }
+  .idea-num { font-size: 11px; color: var(--muted2); font-weight: 600; margin-bottom: 4px; }
+  .idea-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.35; }
+  .idea-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+  .idea-footer { display: flex; align-items: center; justify-content: space-between; }
+  .status-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 10px; text-transform: uppercase; letter-spacing: .5px; }
+  .badge-active { background: var(--green-badge); color: var(--green); }
+  .badge-momentum { background: var(--green-badge); color: var(--green); }
+  .badge-queued { background: var(--accent-dim); color: var(--accent); }
+  .badge-parked { background: var(--surface3); color: var(--muted); }
+  .badge-assigned { background: var(--amber-dim); color: var(--amber); }
+  .mode-tag { font-size: 11px; color: var(--muted2); background: var(--surface3); padding: 2px 8px; border-radius: 8px; }
+
+  /* PEOPLE */
+  .people-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .person-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .person-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .person-role { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .person-detail { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .person-contact { margin-top: 8px; font-size: 12px; color: var(--accent); }
+
+  /* DOCS */
+  .docs-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  .doc-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 13px 16px; display: flex; align-items: flex-start; gap: 10px; }
+  .doc-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .doc-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .doc-desc { font-size: 12px; color: var(--muted); }
+  .doc-item a { text-decoration: none; color: inherit; }
+  .doc-item a:hover .doc-name { color: var(--accent); }
+
+  /* NEW TASK BUTTON */
+  .btn-new-task { background: var(--accent-dim); color: var(--accent); border: 1.5px solid var(--accent); border-radius: 6px; padding: 5px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 5px; }
+  .btn-new-task:hover { background: var(--accent); color: #fff; }
+  .btn-new-task::before { content: '+'; font-size: 16px; line-height: 1; }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 520px; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.6); transform: translateY(16px); transition: transform .2s; }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
+  .form-row { margin-bottom: 14px; }
+  .form-row label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .form-row input, .form-row textarea, .form-row select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 14px; padding: 9px 12px; font-family: inherit; transition: border-color .15s; }
+  .form-row input:focus, .form-row textarea:focus, .form-row select:focus { outline: none; border-color: var(--accent); }
+  .form-row textarea { resize: vertical; min-height: 70px; }
+  .form-row select option { background: var(--surface2); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .btn-cancel { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 8px 18px; font-size: 14px; cursor: pointer; transition: all .15s; }
+  .btn-cancel:hover { border-color: var(--muted); color: var(--text); }
+  .btn-save { background: var(--accent); border: none; color: white; border-radius: 6px; padding: 8px 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; }
+  .btn-save:hover { background: #3A8ECB; }
+  .local-badge { font-size: 10px; background: var(--amber-dim); color: var(--amber); border-radius: 8px; padding: 1px 6px; margin-left: 6px; font-weight: 600; vertical-align: middle; }
+  .btn-delete-task { background: none; border: none; color: var(--muted2); cursor: pointer; font-size: 14px; padding: 0 4px; line-height: 1; transition: color .15s; }
+  .btn-delete-task:hover { color: var(--red); }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+
+  /* FOOTER */
+  footer { text-align: center; padding: 24px; color: var(--muted2); font-size: 12px; border-top: 1px solid var(--border); margin-top: 12px; background: var(--surface); }
+
+  /* RESPONSIVE */
+  @media(max-width: 600px) {
+    nav { padding: 12px 16px; }
+    .container { padding: 16px; }
+    .tasks-table { font-size: 13px; }
+    .tasks-table th, .tasks-table td { padding: 9px 11px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-title">Mortell-Miller <span>Collab Notebook</span></div>
+  <div style="display:flex;align-items:center;gap:20px">
+    <div class="nav-links">
+      <a href="#momentum">Momentum</a>
+      <a href="#tasks">Tasks</a>
+      <a href="#ideas">Ideas</a>
+      <a href="#people">People</a>
+      <a href="#docs">Docs</a>
+    </div>
+    <div class="updated" id="lastUpdated"></div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- SITE DESCRIPTION -->
+  <div style="margin-bottom:20px;padding:16px 22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:14px;line-height:1.6;">
+    A private working space for Art Mortell and Mike Miller — tracking ideas, tasks, projects, and key contacts as the collaboration grows. Momentum Work is the mission; everything else is how we build toward it.
+  </div>
+
+  <!-- MOMENTUM BANNER -->
+  <div class="momentum-banner" id="momentum">
+    <h2>Momentum Work</h2>
+    <div class="momentum-grid" id="momentumGrid"></div>
+  </div>
+
+  <!-- NEW TASK MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h3>New Task</h3>
+      <div class="form-row">
+        <label>Task</label>
+        <textarea id="f-task" placeholder="Describe the task..."></textarea>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Owner</label>
+          <select id="f-owner">
+            <option value="mike">Mike</option>
+            <option value="art">Art</option>
+            <option value="momentum">Momentum</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Priority</label>
+          <select id="f-priority">
+            <option value="high">High</option>
+            <option value="med">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Due</label>
+          <input id="f-due" type="text" placeholder="e.g. Mon June 2">
+        </div>
+        <div class="form-row">
+          <label>Context</label>
+          <input id="f-context" type="text" placeholder="Optional notes">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="modalCancel">Cancel</button>
+        <button class="btn-save" id="modalSave">Add Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TASKS -->
+  <section id="tasks">
+    <div class="section-hdr">
+      <h2>Tasks &amp; Assignments</h2>
+      <span class="count" id="taskCount"></span>
+      <button class="btn-new-task" id="openModal">New Task</button>
+    </div>
+    <table class="tasks-table">
+      <thead>
+        <tr>
+          <th style="width:36px"></th>
+          <th>Task</th>
+          <th>Owner</th>
+          <th>Due</th>
+          <th>Context</th>
+        </tr>
+      </thead>
+      <tbody id="tasksBody"></tbody>
+    </table>
+  </section>
+
+  <!-- IDEAS -->
+  <section id="ideas">
+    <div class="section-hdr">
+      <h2>The 20-Idea Board</h2>
+      <span class="count" id="ideaCount"></span>
+    </div>
+    <div class="filter-bar" id="filterBar"></div>
+    <div class="ideas-grid" id="ideasGrid"></div>
+  </section>
+
+  <!-- PEOPLE -->
+  <section id="people">
+    <div class="section-hdr">
+      <h2>Key People</h2>
+    </div>
+    <div class="people-grid" id="peopleGrid"></div>
+  </section>
+
+  <!-- DOCS -->
+  <section id="docs">
+    <div class="section-hdr">
+      <h2>Docs &amp; Resources</h2>
+    </div>
+    <div class="docs-list" id="docsList"></div>
+  </section>
+
+</div>
+
+<footer>Mortell-Miller Collab Notebook &nbsp;·&nbsp; Updated via GitHub &nbsp;·&nbsp; Private</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// DATA — Edit this section to update the site
+// ─────────────────────────────────────────────────────────
+const DATA = {
+
+  lastUpdated: "May 31, 2026",
+
+  // ── MOMENTUM STATUS CARDS ──────────────────────────────
+  momentum: [
+    { label: "Jack Status", value: "Pending Informal Briefing", sub: "Momentum team briefs Jack before any group meeting" },
+    { label: "Next Key Date", value: "Friday, June 5", sub: "Possible meeting — Mike & Art aligned, Danielle coordinating" },
+    { label: "Track 1 — Jack", value: "Find Business Host", sub: "Nonprofit preferred · Momentum can fund as paid internship" },
+    { label: "Track 2 — Workshops", value: "Separate Scope", sub: "Broader Momentum client curriculum · independent timeline & funding" },
+    { label: "Ethics Note", value: "Transparency to Danielle", sub: "Required before any Jack-related next step" },
+  ],
+
+  // ── TASKS ─────────────────────────────────────────────
+  // priority: high | med | low
+  // owner: mike | art | momentum
+  // due: string label
+  // done: true | false
+  tasks: [
+    { priority: "high", task: "Email Art: 1-paragraph concept for Idea #1 (Art's Methodology for AI Learning) + title", owner: "mike", due: "Sun June 1", context: "Draft tonight, sleep on it, revise in morning", done: false },
+    { priority: "high", task: "Email Art: forward the AI-generated Art Mortell thesis summary", owner: "mike", due: "Sun June 1", context: "Cut & paste from Claude session output", done: false },
+    { priority: "high", task: "Contact Danielle — transparency note before any Jack-related action", owner: "mike", due: "Before Fri June 5", context: "Art & Mike side projects must be disclosed; clear separation from Jack track", done: false },
+    { priority: "high", task: "Locate beta machine for 1975 tape transfer", owner: "mike", due: "Mon June 2", context: "Art says Ronnie couldn't find one — Mike says he can. Tape 8 is first test.", done: false },
+    { priority: "high", task: "Send bio to Art (formal PDF + casual bio)", owner: "mike", due: "Done ✓", context: "Sent May 31", done: true },
+    { priority: "med", task: "Send photos of beta tape 8 case and packaging", owner: "art", due: "Soon", context: "Via Catalina's email — Art has all 8 tapes in physical possession", done: false },
+    { priority: "med", task: "Read one narrative/chapter from Art's book per night; take notes on extraction candidates", owner: "mike", due: "Ongoing", context: "Art pointed Mike to Anthony Barton's narrative first. Notes feed the AI knowledge system.", done: false },
+    { priority: "med", task: "Watch 5-minute Anthony Barton / Sierra Leone documentary trailer", owner: "mike", due: "This week", context: "Art emailed it. Form view on whether/how to reignite the Blair Underwood / Damascus / Amazon project.", done: false },
+    { priority: "med", task: "Research Damascus Productions (Heather & Ryan O'Quinn)", owner: "mike", due: "This week", context: "Faith-based film company, Westlake/Burbank, subsidiary of Simonds. Check with boss Chris — possible prior relationship.", done: false },
+    { priority: "med", task: "Create partnership architecture sketch to bring to lunch", owner: "mike", due: "Before lunch", context: "Art's request: the spokes, the model, the atoms. Compensation baked in. Done — v2 filed.", done: true },
+    { priority: "med", task: "Prepare structured onboarding interview questions for Art", owner: "mike", due: "This week", context: "On camera or recorded. Art said 'I'm ready.' Feeds Legacy AI knowledge system.", done: false },
+    { priority: "med", task: "Brief Jack informally before any group meeting", owner: "momentum", due: "Before Fri June 5", context: "Danielle & Allison to approach Jack first. Mike available for face-to-face when Jack is ready.", done: false },
+    { priority: "low", task: "Schedule lunch — Luna Grill or Cheesecake Factory", owner: "mike", due: "Tue or Wed this week", context: "Art has dental Mon, grandson Tue lunch — Wednesday most likely. 1 hour min to finish 20-idea list.", done: false },
+    { priority: "low", task: "Strategize Jerry Cox contact approach with Art before reaching out", owner: "mike", due: "At lunch", context: "Jerry Cox (612-327-6190) — Total Training Network videos of Art in the cloud. Do not call yet.", done: false },
+  ],
+
+  // ── IDEAS ──────────────────────────────────────────────
+  // status: momentum | active | assigned | queued | parked
+  ideas: [
+    { num: "PRIORITY", title: "Jack's Real-World AI Project", desc: "Jack builds a real RAG deployment for a Ventura-area business. Mike guides. Momentum supports. Jack walks away with a portfolio piece.", status: "momentum", mode: "Mike Leads" },
+    { num: "PRIORITY", title: "Momentum Work AI Workshops", desc: "Broader AI curriculum for Momentum Work clients — separate scope, timeline, and funding from Jack's individual track.", status: "momentum", mode: "Mike Leads" },
+    { num: "Idea 1", title: "Art's Methodology for AI Learning", desc: "Training package built around Art's failure/rejection/discipline method applied to how people learn AI. First joint product.", status: "assigned", mode: "Equal Partners" },
+    { num: "Idea 2", title: "Mike Carries Art's Legacy", desc: "Mike becomes a caretaker of Art's work — presenting it in Mike's own voice. Art named this separately when Mike used the phrase 'legacy companion.'", status: "active", mode: "Mike Leads" },
+    { num: "Idea 3", title: "Art Legacy AI Knowledge System", desc: "All of Art's books, speeches, interviews synthesized into a queryable AI system — built around his documented principles, not a simulation of Art the person.", status: "active", mode: "Mike Leads" },
+    { num: "Idea 4", title: "Mike Presents Art's Lectures", desc: "Mike studies Art's material deeply, then presents Art's lectures — reducing Art's personal lecture load over time. Art numbered this explicitly.", status: "active", mode: "Mike Leads / Art Mentors" },
+    { num: "Idea 5", title: "Art as Speaker — Ventura Events", desc: "Position Art as a speaker for Ventura Chamber or similar events. Side point raised on call.", status: "queued", mode: "Mike Leads" },
+    { num: "Idea 6", title: "Structured Onboarding Interview", desc: "Recorded interview with Art using prepared questions to extract method, principles, stories, and decision frameworks. Art said: 'I'm ready.'", status: "active", mode: "Equal Partners" },
+    { num: "Idea 7", title: "Amazon / Tom Hopkins IP Issue", desc: "Tom Hopkins (Art's student 1969) is credited for Art's IP on Amazon merch. Explore contacting Amazon to correct attribution and replace with Art-attributed product line.", status: "queued", mode: "Mike Leads" },
+    { num: "Idea 8", title: "Intern / Support Person", desc: "Find an intern — possibly through Momentum — to help Mike manage and accelerate the methodology project. Art offered to pay at least minimum wage.", status: "queued", mode: "Art Supports" },
+    { num: "Idea 9", title: "Recover & Digitize Art's 8 Beta Tapes", desc: "8 beta tapes from a 1975 training program (via Ed Heron). Mike to locate beta machine. Tape 8 is the first test transfer. Art has physical possession.", status: "active", mode: "Mike Leads" },
+    { num: "Idea 10", title: "Update 1975 Training Into New Product", desc: "Once tapes are transferred, Art records updates and commentary — turning the old training into a current product. Dependent on Idea 9.", status: "queued", mode: "Equal Partners" },
+    { num: "Idea 11", title: "Mike as Agent / Manager for Capable People", desc: "Mike represents technically capable people who need help turning their aptitude into paid work. Jack is a possible first case. Art's words: 'This is your baby.'", status: "active", mode: "Mike's Business" },
+    { num: "Idea 12", title: "Anthony Barton Documentary", desc: "Reignite the stalled Blair Underwood / Amazon-Apple / Damascus Productions project. Anthony travels the world serving the least of us — Sierra Leone focus. Art believes Mike has 'catalyst competency' to restart this.", status: "queued", mode: "Mike as Catalyst" },
+    { num: "Idea 13", title: "Jerry Cox Video Archive", desc: "Recover Art's Total Training Network videos (Cleveland, Minneapolis engagements + interview) from the cloud via Jerry Cox. Integrate into Legacy AI system.", status: "queued", mode: "Mike Leads" },
+  ],
+
+  // ── PEOPLE ────────────────────────────────────────────
+  people: [
+    { name: "Art Mortell", role: "Partner · Author · Speaker · Mentor (86)", detail: "11 books. 4,000+ presentations (IBM, Merrill Lynch, Morgan Stanley). Methodology: failure as feedback, rejection as depersonalization, momentum through discipline.", contact: "art@artmortell.com · 805-351-0503 · artmortell.com" },
+    { name: "Danielle Segovia", role: "Momentum Work — Individual Employment Services", detail: "Primary contact at Momentum. Led Mike's engagement. Aligned with two-track framework as of May 22.", contact: "" },
+    { name: "Allison Poe", role: "Momentum Work — Team", detail: "Part of the core Momentum team. Aligned with Mike's two-track framework.", contact: "" },
+    { name: "Peter", role: "Momentum Work — Employment Coordinator", detail: "Same role as Danielle/Allison. Was in earlier meetings. Art proposed Peter as part of a Jack + Mike + Peter triad.", contact: "" },
+    { name: "Jack", role: "Momentum Work Client — Priority", detail: "Early 20s. Neuro/autism. Took ML classes at Channel Islands University. Can build AI systems but doesn't know how to apply them practically. Mike's analogy: knows how to build the car engine, doesn't know how to drive it.", contact: "" },
+    { name: "Anthony Barton", role: "Art's Mentee · Greater Purposes Co-Founder", detail: "Sold a business for $2.5M after Art's guidance. Travels the world serving underserved populations — Uganda, Malawi, Swaziland, Sierra Leone (annual). Has a 5-minute documentary trailer. Blair Underwood is attached.", contact: "310-890-3278 · (Do not contact without Art's direction)" },
+    { name: "Jerry Cox", role: "Total Training Network · Greater Purposes Co-Founder", detail: "Former president of Total Training Network (BI Worldwide). Brought Art in for $10K engagements in Cleveland and Minneapolis. Has video recordings and interview of Art — reportedly in the cloud.", contact: "612-327-6190 · (Do not contact without Art's direction)" },
+    { name: "Blair Underwood", role: "TV Actor · Project Connection", detail: "Enamored with Anthony Barton's Sierra Leone documentary trailer. Has connections at Amazon TV and Apple TV. Interested in replacing Anthony Bourdain with an Anthony Barton-style humanitarian travel show.", contact: "" },
+    { name: "Heather & Ryan O'Quinn", role: "Damascus Productions", detail: "Faith-based film production company, Westlake/Burbank area, near Oaks Christian. Subsidiary of Simonds. Were involved in the Anthony Barton / Sierra Leone project. Art has met with them 4+ times. Boss Chris may have a prior relationship.", contact: "Damascus Productions · Simonds parent company" },
+    { name: "Mike Lawrence", role: "AI Educator — Queens, NY", detail: "Teaching at Queensboro Community College. Transitioning students from coding to AI. Art has made an introduction. Possible collaboration / Spark AI connection.", contact: "" },
+  ],
+
+  // ── DOCS & RESOURCES ──────────────────────────────────
+  docs: [
+    { icon: "📄", name: "Partnership Architecture v2", desc: "Two-track framework with Momentum first, project tracks, compensation — for lunch discussion", url: "" },
+    { icon: "📘", name: "Art Mortell — The Art of Life", desc: "Art's 2025 book. Mike has a signed copy. One narrative per night.", url: "" },
+    { icon: "📗", name: "The Courage to Fail (1992)", desc: "Art's McGraw-Hill book — full text analyzed. Foundation of his methodology.", url: "" },
+    { icon: "📋", name: "AI-Generated Art Mortell Thesis Summary", desc: "Claude's synthesis of Art's methodology and why it maps onto AI learning — send to Art", url: "" },
+    { icon: "🎥", name: "Anthony Barton Documentary Trailer (5 min)", desc: "Sent by Art via email. Blair Underwood attached. Amazon/Apple connections.", url: "" },
+    { icon: "🎞️", name: "Art Mortell YouTube Videos (1990s)", desc: "Pulled from YouTube and saved to Art Mortell folder — includes blonde-lady intro video ca. 1991-95", url: "" },
+    { icon: "🌐", name: "artmortell.com", desc: "Art's website — one quote has been there for decades: 'Where the world changes around you, you gotta change the way you do business.'", url: "https://artmortell.com" },
+    { icon: "🎥", name: "Damascus Productions", desc: "Heather & Ryan O'Quinn — faith-based film company, Westlake/Burbank. Simonds parent.", url: "" },
+    { icon: "📁", name: "Project Files — VADER", desc: "All Art Mortell context docs at /Volumes/VADER/Cowork Projects/Art Mortell/", url: "" },
+  ],
+
+};
+// ─────────────────────────────────────────────────────────
+// END DATA
+// ─────────────────────────────────────────────────────────
+
+// RENDER
+document.getElementById('lastUpdated').textContent = 'Updated ' + DATA.lastUpdated;
+
+// Momentum cards
+const mg = document.getElementById('momentumGrid');
+DATA.momentum.forEach(m => {
+  mg.innerHTML += `<div class="m-card"><div class="label">${m.label}</div><div class="value">${m.value}</div>${m.sub ? `<div class="sub">${m.sub}</div>` : ''}</div>`;
+});
+
+// Tasks — merge hardcoded + localStorage
+const LOCAL_KEY = 'mm_hub_tasks';
+function getLocalTasks() { try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch(e) { return []; } }
+function saveLocalTasks(arr) { localStorage.setItem(LOCAL_KEY, JSON.stringify(arr)); }
+
+function renderTasks() {
+  const tb = document.getElementById('tasksBody');
+  tb.innerHTML = '';
+  const localTasks = getLocalTasks();
+  const allTasks = [...DATA.tasks, ...localTasks];
+  const open = allTasks.filter(t => !t.done);
+  const done = allTasks.filter(t => t.done);
+  document.getElementById('taskCount').textContent = open.length + ' open';
+  [...open, ...done].forEach((t, i) => {
+    const ownerClass = { mike: 'owner-mike', art: 'owner-art', momentum: 'owner-momentum' }[t.owner] || 'owner-mike';
+    const ownerLabel = { mike: 'Mike', art: 'Art', momentum: 'Momentum' }[t.owner] || t.owner;
+    const dueClass = t.done ? 'due-normal' : (t.due && (t.due.includes('Sun') || t.due.includes('Mon')) ? 'due-urgent' : t.due && t.due.includes('Fri') ? 'due-soon' : 'due-normal');
+    const dotClass = { high: 'p-high', med: 'p-med', low: 'p-low' }[t.priority] || 'p-low';
+    const isLocal = t._local;
+    const localIdx = isLocal ? t._idx : null;
+    const deleteBtn = isLocal ? `<button class="btn-delete-task" title="Delete" onclick="deleteLocalTask(${localIdx})">✕</button>` : '';
+    const localBadge = isLocal ? `<span class="local-badge">local</span>` : '';
+    tb.innerHTML += `<tr>
+      <td style="text-align:center"><span class="priority-dot ${dotClass}"></span></td>
+      <td class="${t.done ? 'task-done' : ''}">${t.task}${localBadge}</td>
+      <td><span class="${ownerClass}">${ownerLabel}</span></td>
+      <td class="${dueClass}">${t.due || ''}</td>
+      <td style="color:var(--muted);font-size:13px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><span>${t.context || ''}</span>${deleteBtn}</td>
+    </tr>`;
+  });
+}
+
+function deleteLocalTask(idx) {
+  const arr = getLocalTasks();
+  arr.splice(idx, 1);
+  saveLocalTasks(arr);
+  renderTasks();
+}
+
+// Tag local tasks with their index for deletion
+const _origGetLocal = getLocalTasks;
+function getLocalTasks() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+    return arr.map((t, i) => ({ ...t, _local: true, _idx: i }));
+  } catch(e) { return []; }
+}
+
+renderTasks();
+
+// Modal
+const overlay = document.getElementById('modalOverlay');
+document.getElementById('openModal').onclick = () => overlay.classList.add('open');
+document.getElementById('modalCancel').onclick = () => overlay.classList.remove('open');
+overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+
+document.getElementById('modalSave').onclick = () => {
+  const task = document.getElementById('f-task').value.trim();
+  if (!task) { document.getElementById('f-task').focus(); return; }
+  const newTask = {
+    priority: document.getElementById('f-priority').value,
+    task,
+    owner: document.getElementById('f-owner').value,
+    due: document.getElementById('f-due').value.trim() || 'TBD',
+    context: document.getElementById('f-context').value.trim(),
+    done: false,
+  };
+  const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+  arr.push(newTask);
+  saveLocalTasks(arr);
+  renderTasks();
+  overlay.classList.remove('open');
+  // reset form
+  ['f-task','f-due','f-context'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-priority').value = 'high';
+  document.getElementById('f-owner').value = 'mike';
+};
+
+// Ideas filters
+const statuses = ['all', 'momentum', 'active', 'assigned', 'queued', 'parked'];
+const labels = { all: 'All', momentum: '★ Momentum', active: 'Active', assigned: 'Assigned', queued: 'Queued', parked: 'Parked' };
+const fb = document.getElementById('filterBar');
+statuses.forEach(s => {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn' + (s === 'all' ? ' active' : '');
+  btn.textContent = labels[s];
+  btn.dataset.filter = s;
+  btn.onclick = () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.idea-card').forEach(card => {
+      card.classList.toggle('hidden', s !== 'all' && card.dataset.status !== s);
+    });
+  };
+  fb.appendChild(btn);
+});
+document.getElementById('ideaCount').textContent = DATA.ideas.length + ' ideas';
+
+// Ideas grid
+const ig = document.getElementById('ideasGrid');
+const badgeClass = { momentum: 'badge-momentum', active: 'badge-active', assigned: 'badge-assigned', queued: 'badge-queued', parked: 'badge-parked' };
+const badgeLabel = { momentum: '★ Momentum', active: 'Active', assigned: 'Assigned', queued: 'Queued', parked: 'Parked' };
+DATA.ideas.forEach(idea => {
+  ig.innerHTML += `<div class="idea-card status-${idea.status}" data-status="${idea.status}">
+    <div class="idea-num">${idea.num}</div>
+    <div class="idea-title">${idea.title}</div>
+    <div class="idea-desc">${idea.desc}</div>
+    <div class="idea-footer">
+      <span class="status-badge ${badgeClass[idea.status]}">${badgeLabel[idea.status]}</span>
+      <span class="mode-tag">${idea.mode}</span>
+    </div>
+  </div>`;
+});
+
+// People
+const pg = document.getElementById('peopleGrid');
+DATA.people.forEach(p => {
+  pg.innerHTML += `<div class="person-card">
+    <div class="person-name">${p.name}</div>
+    <div class="person-role">${p.role}</div>
+    <div class="person-detail">${p.detail}</div>
+    ${p.contact ? `<div class="person-contact">${p.contact}</div>` : ''}
+  </div>`;
+});
+
+// Docs
+const dl = document.getElementById('docsList');
+DATA.docs.forEach(d => {
+  dl.innerHTML += `<div class="doc-item">
+    <div class="doc-icon">${d.icon}</div>
+    <div>${d.url ? `<a href="${d.url}" target="_blank"><div class="doc-name">${d.name}</div></a>` : `<div class="doc-name">${d.name}</div>`}
+    <div class="doc-desc">${d.desc}</div></div>
+  </div>`;
+});
+</script>
+</body>
+</html>

@@ -142,6 +142,10 @@
   .local-badge { font-size: 10px; background: var(--amber-dim); color: var(--amber); border-radius: 8px; padding: 1px 6px; margin-left: 6px; font-weight: 600; vertical-align: middle; }
   .btn-delete-task { background: none; border: none; color: var(--muted2); cursor: pointer; font-size: 14px; padding: 0 4px; line-height: 1; transition: color .15s; }
   .btn-delete-task:hover { color: var(--red); }
+  .task-notes { width: 100%; background: transparent; border: 1px solid transparent; border-radius: 5px; color: var(--muted); font-size: 13px; font-family: inherit; padding: 4px 7px; resize: none; min-height: 36px; line-height: 1.5; transition: border-color .15s, background .15s; overflow: hidden; }
+  .task-notes:hover { border-color: var(--border); background: var(--surface2); }
+  .task-notes:focus { outline: none; border-color: var(--accent); background: var(--surface2); color: var(--text); }
+  .task-notes::placeholder { color: var(--muted2); font-style: italic; }
 
   /* HIDDEN */
   .hidden { display: none !important; }
@@ -245,6 +249,7 @@
           <th>Owner</th>
           <th>Due</th>
           <th>Context</th>
+          <th>Notes</th>
         </tr>
       </thead>
       <tbody id="tasksBody"></tbody>
@@ -383,8 +388,12 @@ DATA.momentum.forEach(m => {
 
 // Tasks — merge hardcoded + localStorage
 const LOCAL_KEY = 'mm_hub_tasks';
+const NOTES_KEY = 'mm_hub_notes';
 function getLocalTasks() { try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch(e) { return []; } }
 function saveLocalTasks(arr) { localStorage.setItem(LOCAL_KEY, JSON.stringify(arr)); }
+function getAllNotes() { try { return JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); } catch(e) { return {}; } }
+function saveNote(key, val) { const n = getAllNotes(); n[key] = val; localStorage.setItem(NOTES_KEY, JSON.stringify(n)); }
+function taskKey(t, i) { return t._local ? 'local_' + t._idx : 'task_' + i; }
 
 function renderTasks() {
   const tb = document.getElementById('tasksBody');
@@ -394,6 +403,7 @@ function renderTasks() {
   const open = allTasks.filter(t => !t.done);
   const done = allTasks.filter(t => t.done);
   document.getElementById('taskCount').textContent = open.length + ' open';
+  const notes = getAllNotes();
   [...open, ...done].forEach((t, i) => {
     const ownerClass = { mike: 'owner-mike', art: 'owner-art', momentum: 'owner-momentum' }[t.owner] || 'owner-mike';
     const ownerLabel = { mike: 'Mike', art: 'Art', momentum: 'Momentum' }[t.owner] || t.owner;
@@ -403,13 +413,21 @@ function renderTasks() {
     const localIdx = isLocal ? t._idx : null;
     const deleteBtn = isLocal ? `<button class="btn-delete-task" title="Delete" onclick="deleteLocalTask(${localIdx})">✕</button>` : '';
     const localBadge = isLocal ? `<span class="local-badge">local</span>` : '';
+    const key = taskKey(t, i);
+    const savedNote = notes[key] || '';
     tb.innerHTML += `<tr>
       <td style="text-align:center"><span class="priority-dot ${dotClass}"></span></td>
       <td class="${t.done ? 'task-done' : ''}">${t.task}${localBadge}</td>
       <td><span class="${ownerClass}">${ownerLabel}</span></td>
       <td class="${dueClass}">${t.due || ''}</td>
-      <td style="color:var(--muted);font-size:13px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><span>${t.context || ''}</span>${deleteBtn}</td>
+      <td style="color:var(--muted);font-size:13px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px"><span>${t.context || ''}</span>${deleteBtn}</div></td>
+      <td style="padding:6px 10px;min-width:180px"><textarea class="task-notes" data-key="${key}" placeholder="Add notes..." rows="2">${savedNote}</textarea></td>
     </tr>`;
+  });
+  // attach save-on-blur to all note fields
+  tb.querySelectorAll('.task-notes').forEach(el => {
+    el.addEventListener('blur', () => saveNote(el.dataset.key, el.value));
+    el.addEventListener('input', () => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; });
   });
 }
 

@@ -47,7 +47,7 @@
       <a href="people.html">People</a>
       <a href="docs.html">Docs</a>
     </div>
-    <div class="updated">Updated May 31, 2026</div>
+    <div class="updated"><span id="pageDate"></span></div>
   </div>
 </nav>
 <div class="container">
@@ -83,5 +83,6 @@
   </div>
 </div>
 <footer>Mortell-Miller Collab Notebook &nbsp;·&nbsp; Updated via GitHub &nbsp;·&nbsp; Private</footer>
+<script>document.addEventListener("DOMContentLoaded",function(){var el=document.getElementById("pageDate");if(el)el.textContent="Updated "+new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});});</script>
 </body>
 </html>

@@ -64,7 +64,7 @@
       <a href="people.html">People</a>
       <a href="docs.html">Docs</a>
     </div>
-    <div style="color:var(--muted2);font-size:12px">Updated May 31, 2026</div>
+    <div style="color:var(--muted2);font-size:12px"><span id="pageDate"></span></div>
   </div>
 </nav>
 
@@ -132,5 +132,6 @@ IDEAS.forEach(idea => {
   </div>`;
 });
 </script>
+<script>document.addEventListener("DOMContentLoaded",function(){var el=document.getElementById("pageDate");if(el)el.textContent="Updated "+new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});});</script>
 </body>
 </html>

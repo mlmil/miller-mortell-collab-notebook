@@ -32,6 +32,9 @@
   .tasks-table td { padding: 28px 20px; border-bottom: 1px solid var(--border); font-size: 17px; vertical-align: middle; color: var(--text); line-height: 1.3; }
   .tasks-table tr:last-child td { border-bottom: none; }
   .tasks-table tr:hover td { background: var(--surface2); }
+  .tasks-table tr.drag-over td { background: var(--accent-dim); border-top: 2px solid var(--accent); }
+  .drag-handle { cursor: grab; color: var(--muted2); font-size: 20px; padding: 0 8px; user-select: none; line-height: 1; }
+  .drag-handle:active { cursor: grabbing; }
   .owner-mike { background: var(--accent-dim); color: var(--accent); padding: 5px 14px; border-radius: 10px; font-size: 15px; font-weight: 600; white-space: nowrap; }
   .owner-art { background: #2D1A4A; color: #B07EE8; padding: 5px 14px; border-radius: 10px; font-size: 15px; font-weight: 600; white-space: nowrap; }
   .owner-momentum { background: var(--green-badge); color: var(--green); padding: 5px 14px; border-radius: 10px; font-size: 15px; font-weight: 600; white-space: nowrap; }
@@ -145,7 +148,8 @@
   <table class="tasks-table">
     <thead>
       <tr>
-        <th style="width:36px"></th>
+        <th style="width:32px"></th>
+        <th style="width:44px"></th>
         <th>Task</th>
         <th>Notes</th>
         <th>Context</th>
@@ -232,8 +236,11 @@ function renderTasks() {
   open.forEach(t => {
     const oc = {mike:'owner-mike',art:'owner-art',momentum:'owner-momentum'}[t.owner]||'owner-mike';
     const ol = {mike:'Mike',art:'Art',momentum:'Momentum'}[t.owner]||t.owner;
-    tb.innerHTML += `<tr>
-      <td style="text-align:center;padding-left:14px;width:44px">
+    tb.innerHTML += `<tr draggable="true" data-idx="${t._i}">
+      <td style="text-align:center;padding:0 4px;width:32px">
+        <span class="drag-handle" title="Drag to reorder">⠿</span>
+      </td>
+      <td style="text-align:center;padding-left:4px;width:44px">
         <input type="checkbox" class="task-check" onchange="toggleComplete(${t._i})">
       </td>
       <td style="padding:10px 14px">
@@ -267,6 +274,41 @@ function renderTasks() {
     autoExpand(el);
     el.addEventListener('blur', () => { tasks[el.dataset.idx].context = el.value; saveTasks(); });
     el.addEventListener('input', () => autoExpand(el));
+  });
+
+  // Drag-and-drop reordering
+  let dragIdx = null;
+  tb.querySelectorAll('tr[draggable]').forEach(row => {
+    row.addEventListener('dragstart', e => {
+      dragIdx = parseInt(row.dataset.idx);
+      row.style.opacity = '0.4';
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    row.addEventListener('dragend', () => {
+      row.style.opacity = '';
+      tb.querySelectorAll('tr').forEach(r => r.classList.remove('drag-over'));
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      tb.querySelectorAll('tr').forEach(r => r.classList.remove('drag-over'));
+      row.classList.add('drag-over');
+    });
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      const dropIdx = parseInt(row.dataset.idx);
+      if (dragIdx === null || dragIdx === dropIdx) return;
+      // Reorder within the open tasks
+      const open = tasks.map((t,i) => ({...t, _i:i})).filter(t => !t.done);
+      const dragItem = open.find(t => t._i === dragIdx);
+      const dropItem = open.find(t => t._i === dropIdx);
+      if (!dragItem || !dropItem) return;
+      // Swap positions in the tasks array
+      const di = tasks.indexOf(tasks[dragIdx]);
+      const ti = tasks.indexOf(tasks[dropIdx]);
+      [tasks[di], tasks[ti]] = [tasks[ti], tasks[di]];
+      saveTasks();
+      renderTasks();
+    });
   });
 }
 

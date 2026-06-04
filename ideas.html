@@ -10,7 +10,7 @@
     --accent: #4A9EDB; --accent-dim: #1D3A57;
     --green: #2ECC71; --green-dim: #0D3320; --green-badge: #163D25;
     --amber: #F0A500; --amber-dim: #3A2800;
-    --red: #E05252; --border: #2A3248; --text: #E8ECF4; --muted: #E8ECF4; --muted2: #C8D0E0; --white: #FFFFFF;
+    --red: #E05252; --red-dim: #3A1010; --border: #2A3248; --text: #E8ECF4; --muted: #E8ECF4; --muted2: #C8D0E0; --white: #FFFFFF;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; }
@@ -22,7 +22,7 @@
   .nav-links a:hover { background: var(--green-dim); border-color: var(--green); }
   .nav-links a.active { background: var(--green-dim); border-color: var(--green); }
   .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
-  .section-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .section-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
   .section-hdr h2 { font-size: 16px; font-weight: 700; color: var(--text); }
   .section-hdr .count { background: var(--surface3); color: var(--muted); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
   .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -30,13 +30,14 @@
   .filter-btn:hover { border-color: var(--green); color: var(--green); }
   .filter-btn.active { border-color: var(--green); background: var(--green-dim); color: var(--green); }
   .ideas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
-  .idea-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; border-top: 3px solid transparent; transition: transform .15s, box-shadow .15s; }
+  .idea-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; border-top: 3px solid transparent; transition: transform .15s, box-shadow .15s; position: relative; }
   .idea-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.35); }
   .idea-card.status-active { border-top-color: var(--green); }
   .idea-card.status-momentum { border-top-color: var(--green); }
   .idea-card.status-queued { border-top-color: var(--accent); }
   .idea-card.status-parked { border-top-color: var(--muted2); }
   .idea-card.status-assigned { border-top-color: var(--amber); }
+  .idea-card.status-new { border-top-color: var(--red); animation: fadeIn .4s ease; }
   .idea-num { font-size: 11px; color: var(--muted2); font-weight: 600; margin-bottom: 4px; }
   .idea-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.35; }
   .idea-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
@@ -47,8 +48,48 @@
   .badge-queued { background: var(--accent-dim); color: var(--accent); }
   .badge-parked { background: var(--surface3); color: var(--muted); }
   .badge-assigned { background: var(--amber-dim); color: var(--amber); }
+  .badge-new { background: var(--red-dim); color: var(--red); }
   .mode-tag { font-size: 11px; color: var(--muted2); background: var(--surface3); padding: 2px 8px; border-radius: 8px; }
+  .btn-delete-idea { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--muted2); cursor: pointer; font-size: 14px; opacity: 0; transition: opacity .15s, color .15s; }
+  .idea-card:hover .btn-delete-idea { opacity: 1; }
+  .btn-delete-idea:hover { color: var(--red); }
   .hidden { display: none !important; }
+
+  /* BUTTONS */
+  .btn-mic { display: flex; align-items: center; gap: 8px; background: var(--red-dim); color: var(--red); border: 1.5px solid var(--red); border-radius: 8px; padding: 8px 18px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; margin-left: auto; }
+  .btn-mic:hover { background: var(--red); color: #fff; }
+  .btn-mic.recording { background: var(--red); color: #fff; animation: pulse 1s infinite; }
+  .btn-type-idea { display: flex; align-items: center; gap: 8px; background: var(--accent-dim); color: var(--accent); border: 1.5px solid var(--accent); border-radius: 8px; padding: 8px 18px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .btn-type-idea:hover { background: var(--accent); color: #fff; }
+  /* TEXT IDEA MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 560px; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.6); transform: translateY(16px); transition: transform .2s; }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .modal p { font-size: 13px; color: var(--muted2); margin-bottom: 16px; }
+  .modal textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 15px; padding: 12px 14px; font-family: inherit; resize: vertical; min-height: 140px; line-height: 1.6; transition: border-color .15s; }
+  .modal textarea:focus { outline: none; border-color: var(--accent); }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; align-items: center; }
+  .btn-cancel { background: transparent; border: 1px solid var(--border); color: var(--muted2); border-radius: 6px; padding: 8px 18px; font-size: 14px; cursor: pointer; transition: all .15s; }
+  .btn-cancel:hover { border-color: var(--muted2); color: var(--text); }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(224,82,82,.4); } 50% { box-shadow: 0 0 0 10px rgba(224,82,82,0); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* VOICE PANEL */
+  .voice-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; display: none; }
+  .voice-panel.show { display: block; animation: fadeIn .3s ease; }
+  .voice-status { font-size: 13px; color: var(--muted2); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .voice-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); animation: pulse 1s infinite; flex-shrink: 0; }
+  .voice-transcript { font-size: 14px; color: var(--muted); line-height: 1.6; min-height: 60px; background: var(--surface2); border-radius: 6px; padding: 12px; margin-bottom: 12px; white-space: pre-wrap; }
+  .voice-actions { display: flex; gap: 10px; }
+  .btn-parse { background: var(--green); color: #0D3320; border: none; border-radius: 6px; padding: 9px 20px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background .15s; }
+  .btn-parse:hover { background: #25b362; }
+  .btn-parse:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-discard { background: transparent; color: var(--muted2); border: 1px solid var(--border); border-radius: 6px; padding: 9px 18px; font-size: 14px; cursor: pointer; transition: all .15s; }
+  .btn-discard:hover { border-color: var(--muted2); color: var(--text); }
+  .parse-status { font-size: 13px; color: var(--amber); margin-left: 10px; }
+
   footer { text-align: center; padding: 24px; color: var(--muted2); font-size: 12px; border-top: 1px solid var(--border); margin-top: 12px; background: var(--surface); }
   @media(max-width: 600px) { nav { padding: 12px 16px; } .container { padding: 16px; } }
 </style>
@@ -72,7 +113,40 @@
   <div class="section-hdr">
     <h2>The 20-Idea Board</h2>
     <span class="count" id="ideaCount"></span>
+    <div style="display:flex;gap:8px;margin-left:auto">
+      <button class="btn-type-idea" id="typeIdeaBtn">✏️ Type Idea</button>
+      <button class="btn-mic" id="micBtn" title="Record a new idea">🎙 Record Idea</button>
+    </div>
   </div>
+
+  <!-- TEXT IDEA MODAL -->
+  <div class="modal-overlay" id="typeIdeaModal">
+    <div class="modal">
+      <h3>✏️ Add an Idea</h3>
+      <p>Type, paste, or dump your raw thoughts — AI will distill it into a clean card.</p>
+      <textarea id="typeIdeaText" placeholder="Type or paste your idea here... don't worry about formatting, just get it out."></textarea>
+      <div class="modal-actions">
+        <span class="parse-status" id="typeParseStatus"></span>
+        <button class="btn-cancel" id="typeIdeaCancel">Cancel</button>
+        <button class="btn-parse" id="typeIdeaSubmit">✨ Turn Into Idea Card</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOICE PANEL -->
+  <div class="voice-panel" id="voicePanel">
+    <div class="voice-status">
+      <span class="voice-dot" id="voiceDot"></span>
+      <span id="voiceStatusText">Listening... speak your idea</span>
+    </div>
+    <div class="voice-transcript" id="voiceTranscript">Your words will appear here...</div>
+    <div class="voice-actions">
+      <button class="btn-parse" id="parseBtn" disabled>✨ Turn Into Idea Card</button>
+      <button class="btn-discard" id="discardBtn">Discard</button>
+      <span class="parse-status" id="parseStatus"></span>
+    </div>
+  </div>
+
   <div class="filter-bar" id="filterBar"></div>
   <div class="ideas-grid" id="ideasGrid"></div>
 </div>
@@ -80,7 +154,12 @@
 <footer>Mortell-Miller Collab Notebook &nbsp;·&nbsp; Updated via GitHub &nbsp;·&nbsp; Private</footer>
 
 <script>
-const IDEAS = [
+// ── Config ──────────────────────────────────────────────
+const DEEPSEEK_KEY = 'sk-a97e5d3db45e48f4b6f24cb04d085d5c';
+const IDEAS_DB = 'https://mortell-miller-web-site-default-rtdb.firebaseio.com/ideas.json';
+
+// ── Hardcoded ideas ─────────────────────────────────────
+const STATIC_IDEAS = [
   { num: "PRIORITY", title: "Jack's Real-World AI Project", desc: "Jack builds a real RAG deployment for a Ventura-area business. Mike guides. Momentum supports. Jack walks away with a portfolio piece.", status: "momentum", mode: "Mike Leads" },
   { num: "PRIORITY", title: "Momentum Work AI Workshops", desc: "Broader AI curriculum for Momentum Work clients — separate scope, timeline, and funding from Jack's individual track.", status: "momentum", mode: "Mike Leads" },
   { num: "Idea 1", title: "Art's Methodology for AI Learning", desc: "Training package built around Art's failure/rejection/discipline method applied to how people learn AI. First joint product.", status: "assigned", mode: "Equal Partners" },
@@ -98,10 +177,63 @@ const IDEAS = [
   { num: "Idea 13", title: "Jerry Cox Video Archive", desc: "Recover Art's Total Training Network videos (Cleveland, Minneapolis engagements + interview) from the cloud via Jerry Cox. Integrate into Legacy AI system.", status: "queued", mode: "Mike Leads" },
 ];
 
-document.getElementById('ideaCount').textContent = IDEAS.length + ' ideas';
+// ── Voice ideas from Firebase ────────────────────────────
+let voiceIdeas = [];
 
-const statuses = ['all','momentum','active','assigned','queued','parked'];
-const labels = {all:'All',momentum:'★ Momentum',active:'Active',assigned:'Assigned',queued:'Queued',parked:'Parked'};
+async function loadVoiceIdeas() {
+  try {
+    const res = await fetch(IDEAS_DB);
+    const data = await res.json();
+    voiceIdeas = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
+  } catch(e) { voiceIdeas = []; }
+  renderAllIdeas();
+}
+
+async function saveVoiceIdeas() {
+  await fetch(IDEAS_DB, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(voiceIdeas)
+  });
+}
+
+async function deleteVoiceIdea(idx) {
+  voiceIdeas.splice(idx, 1);
+  await saveVoiceIdeas();
+  renderAllIdeas();
+}
+
+// ── Render ───────────────────────────────────────────────
+const badgeClass = {momentum:'badge-momentum',active:'badge-active',assigned:'badge-assigned',queued:'badge-queued',parked:'badge-parked',new:'badge-new'};
+const badgeLabel = {momentum:'★ Momentum',active:'Active',assigned:'Assigned',queued:'Queued',parked:'Parked',new:'New'};
+
+function renderAllIdeas() {
+  const ig = document.getElementById('ideasGrid');
+  ig.innerHTML = '';
+  const all = [...STATIC_IDEAS, ...voiceIdeas];
+  document.getElementById('ideaCount').textContent = all.length + ' ideas';
+
+  all.forEach((idea, i) => {
+    const isVoice = i >= STATIC_IDEAS.length;
+    const voiceIdx = i - STATIC_IDEAS.length;
+    const delBtn = isVoice ? `<button class="btn-delete-idea" onclick="deleteVoiceIdea(${voiceIdx})" title="Delete">✕</button>` : '';
+    const st = idea.status || 'new';
+    ig.innerHTML += `<div class="idea-card status-${st}" data-status="${st}">
+      ${delBtn}
+      <div class="idea-num">${idea.num || 'New Idea'}</div>
+      <div class="idea-title">${idea.title}</div>
+      <div class="idea-desc">${idea.desc}</div>
+      <div class="idea-footer">
+        <span class="status-badge ${badgeClass[st]||'badge-new'}">${badgeLabel[st]||'New'}</span>
+        <span class="mode-tag">${idea.mode || ''}</span>
+      </div>
+    </div>`;
+  });
+}
+
+// ── Filters ──────────────────────────────────────────────
+const statuses = ['all','momentum','active','assigned','queued','parked','new'];
+const labels = {all:'All',momentum:'★ Momentum',active:'Active',assigned:'Assigned',queued:'Queued',parked:'Parked',new:'New (Voice)'};
 const fb = document.getElementById('filterBar');
 statuses.forEach(s => {
   const btn = document.createElement('button');
@@ -117,20 +249,189 @@ statuses.forEach(s => {
   fb.appendChild(btn);
 });
 
-const badgeClass = {momentum:'badge-momentum',active:'badge-active',assigned:'badge-assigned',queued:'badge-queued',parked:'badge-parked'};
-const badgeLabel = {momentum:'★ Momentum',active:'Active',assigned:'Assigned',queued:'Queued',parked:'Parked'};
-const ig = document.getElementById('ideasGrid');
-IDEAS.forEach(idea => {
-  ig.innerHTML += `<div class="idea-card status-${idea.status}" data-status="${idea.status}">
-    <div class="idea-num">${idea.num}</div>
-    <div class="idea-title">${idea.title}</div>
-    <div class="idea-desc">${idea.desc}</div>
-    <div class="idea-footer">
-      <span class="status-badge ${badgeClass[idea.status]}">${badgeLabel[idea.status]}</span>
-      <span class="mode-tag">${idea.mode}</span>
-    </div>
-  </div>`;
-});
+// ── Voice recording ──────────────────────────────────────
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition, isRecording = false, fullTranscript = '';
+
+const micBtn = document.getElementById('micBtn');
+const voicePanel = document.getElementById('voicePanel');
+const transcriptEl = document.getElementById('voiceTranscript');
+const parseBtn = document.getElementById('parseBtn');
+const parseStatus = document.getElementById('parseStatus');
+const voiceStatusText = document.getElementById('voiceStatusText');
+
+micBtn.onclick = () => {
+  if (!SpeechRecognition) { alert('Voice recording requires Chrome or Edge.'); return; }
+  if (isRecording) {
+    stopRecording();
+  } else {
+    startRecording();
+  }
+};
+
+function startRecording() {
+  fullTranscript = '';
+  transcriptEl.textContent = 'Your words will appear here...';
+  parseBtn.disabled = true;
+  parseStatus.textContent = '';
+  voicePanel.classList.add('show');
+  micBtn.classList.add('recording');
+  micBtn.textContent = '⏹ Stop Recording';
+  voiceStatusText.textContent = 'Listening... speak your idea';
+  isRecording = true;
+
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = e => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) fullTranscript += e.results[i][0].transcript + ' ';
+      else interim += e.results[i][0].transcript;
+    }
+    transcriptEl.textContent = fullTranscript + interim;
+    if (fullTranscript.trim().length > 10) parseBtn.disabled = false;
+  };
+
+  recognition.onerror = () => stopRecording();
+  recognition.start();
+}
+
+function stopRecording() {
+  isRecording = false;
+  if (recognition) recognition.stop();
+  micBtn.classList.remove('recording');
+  micBtn.textContent = '🎙 Record Idea';
+  voiceStatusText.textContent = 'Recording stopped.';
+  document.getElementById('voiceDot').style.animation = 'none';
+  if (fullTranscript.trim().length > 10) parseBtn.disabled = false;
+}
+
+document.getElementById('discardBtn').onclick = () => {
+  voicePanel.classList.remove('show');
+  if (isRecording) stopRecording();
+};
+
+// ── DeepSeek parsing ─────────────────────────────────────
+parseBtn.onclick = async () => {
+  const transcript = fullTranscript.trim() || transcriptEl.textContent.trim();
+  if (!transcript || transcript === 'Your words will appear here...') return;
+
+  parseBtn.disabled = true;
+  parseStatus.textContent = '✨ Parsing with AI...';
+
+  try {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + DEEPSEEK_KEY
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [{
+          role: 'system',
+          content: 'You parse spoken ideas into structured collaboration cards. Return ONLY valid JSON with these fields: title (5-8 words, punchy), desc (2-3 sentences max, clear and concise), status (one of: active, queued, parked), mode (who leads, e.g. "Mike Leads", "Equal Partners", "Art Leads"). No markdown, no explanation, just the JSON object.'
+        },{
+          role: 'user',
+          content: 'Parse this spoken idea into a card:\n\n' + transcript
+        }],
+        temperature: 0.3
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.choices[0].message.content.trim();
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+
+    const newIdea = {
+      num: 'Idea ' + (STATIC_IDEAS.length + voiceIdeas.length + 1),
+      title: parsed.title,
+      desc: parsed.desc,
+      status: parsed.status || 'queued',
+      mode: parsed.mode || 'Mike Leads',
+      addedAt: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
+    };
+
+    voiceIdeas.push(newIdea);
+    await saveVoiceIdeas();
+    renderAllIdeas();
+
+    voicePanel.classList.remove('show');
+    parseStatus.textContent = '';
+    parseBtn.disabled = false;
+    fullTranscript = '';
+
+  } catch(e) {
+    parseStatus.textContent = '⚠ Parse failed — try again';
+    parseBtn.disabled = false;
+  }
+};
+
+// ── Text idea modal ──────────────────────────────────────
+const typeModal = document.getElementById('typeIdeaModal');
+const typeText  = document.getElementById('typeIdeaText');
+const typeParseStatus = document.getElementById('typeParseStatus');
+const typeSubmitBtn = document.getElementById('typeIdeaSubmit');
+
+document.getElementById('typeIdeaBtn').onclick = () => {
+  typeText.value = '';
+  typeParseStatus.textContent = '';
+  typeSubmitBtn.disabled = false;
+  typeModal.classList.add('open');
+  setTimeout(() => typeText.focus(), 200);
+};
+document.getElementById('typeIdeaCancel').onclick = () => typeModal.classList.remove('open');
+typeModal.addEventListener('click', e => { if (e.target === typeModal) typeModal.classList.remove('open'); });
+
+typeSubmitBtn.onclick = async () => {
+  const text = typeText.value.trim();
+  if (!text) { typeText.focus(); return; }
+  typeSubmitBtn.disabled = true;
+  typeParseStatus.textContent = '✨ Parsing...';
+  try {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + DEEPSEEK_KEY },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [{
+          role: 'system',
+          content: 'You parse raw idea text into structured collaboration cards. Return ONLY valid JSON with: title (5-8 words, punchy), desc (2-3 sentences max, clear and concise), status (one of: active, queued, parked), mode (who leads, e.g. "Mike Leads", "Equal Partners", "Art Leads"). No markdown, no explanation, just the JSON object.'
+        },{
+          role: 'user',
+          content: 'Parse this into a card:\n\n' + text
+        }],
+        temperature: 0.3
+      })
+    });
+    const data = await res.json();
+    const raw = data.choices[0].message.content.trim();
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    const newIdea = {
+      num: 'Idea ' + (STATIC_IDEAS.length + voiceIdeas.length + 1),
+      title: parsed.title,
+      desc: parsed.desc,
+      status: parsed.status || 'queued',
+      mode: parsed.mode || 'Mike Leads',
+      addedAt: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
+    };
+    voiceIdeas.push(newIdea);
+    await saveVoiceIdeas();
+    renderAllIdeas();
+    typeModal.classList.remove('open');
+    typeParseStatus.textContent = '';
+    typeSubmitBtn.disabled = false;
+  } catch(e) {
+    typeParseStatus.textContent = '⚠ Failed — try again';
+    typeSubmitBtn.disabled = false;
+  }
+};
+
+// ── Init ─────────────────────────────────────────────────
+loadVoiceIdeas();
 </script>
 <script>document.addEventListener("DOMContentLoaded",function(){var el=document.getElementById("pageDate");if(el)el.textContent="Updated "+new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});});</script>
 </body>

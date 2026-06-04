@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Momentum Work — Mortell-Miller</title>
+<style>
+  :root {
+    --bg: #0E1117;
+    --surface: #161B27;
+    --surface2: #1E2535;
+    --surface3: #252D40;
+    --accent: #4A9EDB;
+    --accent-dim: #1D3A57;
+    --green: #2ECC71;
+    --green-dim: #0D3320;
+    --green-badge: #163D25;
+    --amber: #F0A500;
+    --amber-dim: #3A2800;
+    --red: #E05252;
+    --red-dim: #3A1010;
+    --border: #2A3248;
+    --text: #E8ECF4;
+    --muted: #E8ECF4;
+    --muted2: #C8D0E0;
+    --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; }
+
+  /* NAV */
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+  .nav-title { color: var(--white); font-size: 18px; font-weight: 700; letter-spacing: .3px; }
+  .nav-title span { color: var(--muted); font-weight: 400; }
+  .nav-links { display: flex; gap: 6px; }
+  .nav-links a { color: var(--green); text-decoration: none; font-size: 13px; padding: 5px 12px; border-radius: 4px; border: 1px solid rgba(46,204,113,.3); transition: all .15s; }
+  .nav-links a:hover { background: var(--green-dim); border-color: var(--green); }
+  .nav-links a.active { background: var(--green-dim); border-color: var(--green); }
+  .updated { color: var(--muted2); font-size: 12px; }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+
+  /* PAGE HEADER */
+  .page-header { background: var(--green-dim); border: 1px solid #1A5E38; border-radius: 10px; padding: 24px 28px; margin-bottom: 28px; }
+  .page-header h1 { font-size: 22px; font-weight: 700; color: var(--green); margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+  .page-header p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* STATUS CARDS */
+  .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 32px; }
+  .m-card { background: var(--surface); border: 1px solid rgba(46,204,113,.2); border-radius: 8px; padding: 14px 16px; }
+  .m-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin-bottom: 4px; }
+  .m-card .value { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text); }
+  .m-card .sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  /* SECTION */
+  section { margin-bottom: 32px; }
+  .section-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .section-hdr h2 { font-size: 16px; font-weight: 700; color: var(--text); }
+  .section-hdr .count { background: var(--surface3); color: var(--muted); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+
+  /* TASKS */
+  .tasks-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  .tasks-table th { background: var(--surface2); color: var(--muted); text-align: left; padding: 11px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
+  .tasks-table td { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: top; color: var(--text); }
+  .tasks-table tr:last-child td { border-bottom: none; }
+  .tasks-table tr:hover td { background: var(--surface2); }
+  .owner-mike { background: var(--accent-dim); color: var(--accent); padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .owner-art { background: #2D1A4A; color: #B07EE8; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .owner-momentum { background: var(--green-badge); color: var(--green); padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .due-urgent { color: var(--red); font-weight: 700; font-size: 13px; }
+  .due-soon { color: var(--amber); font-weight: 600; font-size: 13px; }
+  .due-normal { color: var(--muted); font-size: 13px; }
+  .task-done { text-decoration: line-through; color: var(--muted2); }
+  .task-check { appearance: none; -webkit-appearance: none; width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 4px; background: transparent; cursor: pointer; position: relative; flex-shrink: 0; transition: all .15s; }
+  .task-check:hover { border-color: var(--green); }
+  .task-check:checked { background: var(--green); border-color: var(--green); }
+  .task-check:checked::after { content: '✓'; position: absolute; top: -1px; left: 2px; font-size: 11px; color: #0D3320; font-weight: 700; }
+  .task-notes { width: 100%; background: transparent; border: 1px solid transparent; border-radius: 5px; color: var(--muted); font-size: 13px; font-family: inherit; padding: 4px 7px; resize: none; min-height: 36px; line-height: 1.5; transition: border-color .15s, background .15s; overflow: hidden; }
+  .task-notes:hover { border-color: var(--border); background: var(--surface2); }
+  .task-notes:focus { outline: none; border-color: var(--accent); background: var(--surface2); color: var(--text); }
+  .task-notes::placeholder { color: var(--muted2); font-style: italic; }
+  .local-badge { font-size: 10px; background: var(--amber-dim); color: var(--amber); border-radius: 8px; padding: 1px 6px; margin-left: 6px; font-weight: 600; vertical-align: middle; }
+  .btn-delete-task { background: none; border: none; color: var(--muted2); cursor: pointer; font-size: 14px; padding: 0 4px; line-height: 1; transition: color .15s; }
+  .btn-delete-task:hover { color: var(--red); }
+
+  /* NEW TASK BUTTON */
+  .btn-new-task { background: var(--green-dim); color: var(--green); border: 1.5px solid var(--green); border-radius: 6px; padding: 5px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 5px; }
+  .btn-new-task:hover { background: var(--green); color: #0D3320; }
+  .btn-new-task::before { content: '+'; font-size: 16px; line-height: 1; }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 520px; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.6); transform: translateY(16px); transition: transform .2s; }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
+  .form-row { margin-bottom: 14px; }
+  .form-row label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .form-row input, .form-row textarea, .form-row select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 14px; padding: 9px 12px; font-family: inherit; transition: border-color .15s; }
+  .form-row input:focus, .form-row textarea:focus, .form-row select:focus { outline: none; border-color: var(--green); }
+  .form-row textarea { resize: vertical; min-height: 70px; }
+  .form-row select option { background: var(--surface2); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .btn-cancel { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 8px 18px; font-size: 14px; cursor: pointer; transition: all .15s; }
+  .btn-cancel:hover { border-color: var(--muted); color: var(--text); }
+  .btn-save { background: var(--green); border: none; color: #0D3320; border-radius: 6px; padding: 8px 20px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background .15s; }
+  .btn-save:hover { background: #25b362; }
+
+  /* IDEAS */
+  .ideas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  .idea-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; border-top: 3px solid var(--green); }
+  .idea-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+  .idea-num { font-size: 11px; color: var(--muted2); font-weight: 600; margin-bottom: 4px; }
+  .idea-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.35; }
+  .idea-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+  .idea-footer { display: flex; align-items: center; justify-content: space-between; }
+  .status-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 10px; text-transform: uppercase; letter-spacing: .5px; background: var(--green-badge); color: var(--green); }
+  .mode-tag { font-size: 11px; color: var(--muted2); background: var(--surface3); padding: 2px 8px; border-radius: 8px; }
+
+  /* PEOPLE */
+  .people-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .person-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .person-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .person-role { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .person-detail { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .person-contact { margin-top: 8px; font-size: 12px; color: var(--accent); }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+
+  /* FOOTER */
+  footer { text-align: center; padding: 24px; color: var(--muted2); font-size: 12px; border-top: 1px solid var(--border); margin-top: 12px; background: var(--surface); }
+
+  @media(max-width: 600px) {
+    nav { padding: 12px 16px; }
+    .container { padding: 16px; }
+    .tasks-table th, .tasks-table td { padding: 9px 11px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-title">Mortell-Miller <span>Collab Notebook</span></div>
+  <div style="display:flex;align-items:center;gap:20px">
+    <div class="nav-links">
+      <a href="tasks.html">Tasks</a>
+      <a href="momentum.html" class="active">★ Momentum</a>
+      <a href="ideas.html">Ideas</a>
+      <a href="people.html">People</a>
+      <a href="docs.html">Docs</a>
+    </div>
+    <div class="updated" id="lastUpdated"></div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h1>★ Momentum Work</h1>
+    <p>Dedicated workspace for the Momentum Work collaboration — Jack's AI project, workshop curriculum, and all coordination with Danielle, Allison, and the Momentum team. Separate scope, timeline, and funding from the broader Mortell-Miller projects.</p>
+  </div>
+
+  <!-- STATUS CARDS -->
+  <div class="status-grid" id="statusGrid"></div>
+
+  <!-- NEW TASK MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h3>New Momentum Task</h3>
+      <div class="form-row">
+        <label>Task</label>
+        <textarea id="f-task" placeholder="Describe the task..."></textarea>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Owner</label>
+          <select id="f-owner">
+            <option value="momentum">Momentum</option>
+            <option value="mike">Mike</option>
+            <option value="art">Art</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Priority</label>
+          <select id="f-priority">
+            <option value="high">High</option>
+            <option value="med">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Due</label>
+          <input id="f-due" type="text" placeholder="e.g. Fri June 5">
+        </div>
+        <div class="form-row">
+          <label>Context</label>
+          <input id="f-context" type="text" placeholder="Optional notes">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="modalCancel">Cancel</button>
+        <button class="btn-save" id="modalSave">Add Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TASKS -->
+  <section id="tasks">
+    <div class="section-hdr">
+      <h2>Momentum Tasks</h2>
+      <span class="count" id="taskCount"></span>
+      <button class="btn-new-task" id="openModal">New Task</button>
+    </div>
+    <table class="tasks-table">
+      <thead>
+        <tr>
+          <th style="width:36px"></th>
+          <th>Task</th>
+          <th>Owner</th>
+          <th>Notes</th>
+          <th>Context</th>
+        </tr>
+      </thead>
+      <tbody id="tasksBody"></tbody>
+    </table>
+  </section>
+
+  <!-- IDEAS -->
+  <section id="ideas">
+    <div class="section-hdr">
+      <h2>Momentum Initiatives</h2>
+      <span class="count" id="ideaCount"></span>
+    </div>
+    <div class="ideas-grid" id="ideasGrid"></div>
+  </section>
+
+  <!-- PEOPLE -->
+  <section id="people">
+    <div class="section-hdr">
+      <h2>Momentum Team &amp; Contacts</h2>
+    </div>
+    <div class="people-grid" id="peopleGrid"></div>
+  </section>
+
+</div>
+
+<footer>Mortell-Miller Collab Notebook &nbsp;·&nbsp; Momentum Work &nbsp;·&nbsp; Private</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────
+const DATA = {
+
+  lastUpdated: "May 31, 2026",
+
+  status: [
+    { label: "Jack Status", value: "Pending Informal Briefing", sub: "Momentum team briefs Jack before any group meeting" },
+    { label: "Next Key Date", value: "Friday, June 5", sub: "Possible meeting — Mike & Art aligned, Danielle coordinating" },
+    { label: "Track 1 — Jack", value: "Find Business Host", sub: "Nonprofit preferred · Momentum can fund as paid internship" },
+    { label: "Track 2 — Workshops", value: "Separate Scope", sub: "Broader Momentum client curriculum · independent timeline & funding" },
+    { label: "Ethics Note", value: "Transparency to Danielle", sub: "Required before any Jack-related next step" },
+  ],
+
+  tasks: [
+    { priority: "high", task: "Contact Danielle — transparency note before any Jack-related action", owner: "mike", due: "Before Fri June 5", context: "Art & Mike side projects must be disclosed; clear separation from Jack track", done: false },
+    { priority: "med", task: "Brief Jack informally before any group meeting", owner: "momentum", due: "Before Fri June 5", context: "Danielle & Allison to approach Jack first. Mike available for face-to-face when Jack is ready.", done: false },
+  ],
+
+  ideas: [
+    { num: "PRIORITY", title: "Jack's Real-World AI Project", desc: "Jack builds a real RAG deployment for a Ventura-area business. Mike guides. Momentum supports. Jack walks away with a portfolio piece.", mode: "Mike Leads" },
+    { num: "PRIORITY", title: "Momentum Work AI Workshops", desc: "Broader AI curriculum for Momentum Work clients — separate scope, timeline, and funding from Jack's individual track.", mode: "Mike Leads" },
+  ],
+
+  people: [
+    { name: "Danielle Segovia", role: "Momentum Work — Individual Employment Services", detail: "Primary contact at Momentum. Led Mike's engagement. Aligned with two-track framework as of May 22.", contact: "" },
+    { name: "Allison Poe", role: "Momentum Work — Team", detail: "Part of the core Momentum team. Aligned with Mike's two-track framework.", contact: "" },
+    { name: "Peter", role: "Momentum Work — Employment Coordinator", detail: "Same role as Danielle/Allison. Was in earlier meetings. Art proposed Peter as part of a Jack + Mike + Peter triad.", contact: "" },
+    { name: "Jack", role: "Momentum Work Client — Priority", detail: "Early 20s. Neuro/autism. Took ML classes at Channel Islands University. Can build AI systems but doesn't know how to apply them practically. Mike's analogy: knows how to build the car engine, doesn't know how to drive it.", contact: "" },
+  ],
+
+};
+// ─────────────────────────────────────────────────────────
+// END DATA
+// ─────────────────────────────────────────────────────────
+
+document.getElementById('lastUpdated').textContent = 'Updated ' + DATA.lastUpdated;
+
+// Status cards
+const sg = document.getElementById('statusGrid');
+DATA.status.forEach(m => {
+  sg.innerHTML += `<div class="m-card"><div class="label">${m.label}</div><div class="value">${m.value}</div>${m.sub ? `<div class="sub">${m.sub}</div>` : ''}</div>`;
+});
+
+// Tasks — localStorage keyed separately for momentum page
+const LOCAL_KEY = 'mm_momentum_tasks';
+const NOTES_KEY = 'mm_momentum_notes';
+const CONTEXT_KEY = 'mm_momentum_context';
+const TASKTEXT_KEY = 'mm_momentum_tasktext';
+const COMPLETE_KEY = 'mm_momentum_complete';
+
+function getLocalTasks() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+    return arr.map((t, i) => ({ ...t, _local: true, _idx: i }));
+  } catch(e) { return []; }
+}
+function saveLocalTasks(arr) { localStorage.setItem(LOCAL_KEY, JSON.stringify(arr)); }
+function getAllNotes() { try { return JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); } catch(e) { return {}; } }
+function saveNote(key, val) { const n = getAllNotes(); n[key] = val; localStorage.setItem(NOTES_KEY, JSON.stringify(n)); }
+function getAllContexts() { try { return JSON.parse(localStorage.getItem(CONTEXT_KEY) || '{}'); } catch(e) { return {}; } }
+function saveContext(key, val) { const c = getAllContexts(); c[key] = val; localStorage.setItem(CONTEXT_KEY, JSON.stringify(c)); }
+function getAllTaskTexts() { try { return JSON.parse(localStorage.getItem(TASKTEXT_KEY) || '{}'); } catch(e) { return {}; } }
+function saveTaskText(key, val) { const tt = getAllTaskTexts(); tt[key] = val; localStorage.setItem(TASKTEXT_KEY, JSON.stringify(tt)); }
+function getCompleted() { try { return JSON.parse(localStorage.getItem(COMPLETE_KEY) || '{}'); } catch(e) { return {}; } }
+function setCompleted(key, val) { const c = getCompleted(); c[key] = val; localStorage.setItem(COMPLETE_KEY, JSON.stringify(c)); }
+
+function toggleComplete(key, isLocal, localIdx) {
+  const c = getCompleted();
+  const nowDone = !c[key];
+  setCompleted(key, nowDone);
+  if (isLocal) {
+    const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+    if (arr[localIdx]) { arr[localIdx].done = nowDone; saveLocalTasks(arr); }
+  }
+  renderTasks();
+}
+
+function renderTasks() {
+  const tb = document.getElementById('tasksBody');
+  tb.innerHTML = '';
+  const localTasks = getLocalTasks();
+  const allTasks = [...DATA.tasks, ...localTasks];
+  const completed = getCompleted();
+  const notes = getAllNotes();
+
+  const resolved = allTasks.map((t, i) => {
+    const key = t._local ? 'local_' + t._idx : 'mtask_' + i;
+    return { ...t, _key: key, _done: t.done || !!completed[key] };
+  });
+
+  const open = resolved.filter(t => !t._done);
+  const done = resolved.filter(t => t._done);
+  document.getElementById('taskCount').textContent = open.length + ' open';
+
+  [...open, ...done].forEach((t) => {
+    const ownerClass = { mike: 'owner-mike', art: 'owner-art', momentum: 'owner-momentum' }[t.owner] || 'owner-momentum';
+    const ownerLabel = { mike: 'Mike', art: 'Art', momentum: 'Momentum' }[t.owner] || t.owner;
+    const dueClass = t._done ? 'due-normal' : (t.due && (t.due.includes('Sun') || t.due.includes('Mon')) ? 'due-urgent' : t.due && t.due.includes('Fri') ? 'due-soon' : 'due-normal');
+    const isLocal = !!t._local;
+    const localIdx = isLocal ? t._idx : -1;
+    const deleteBtn = isLocal ? `<button class="btn-delete-task" title="Delete" onclick="deleteLocalTask(${localIdx})">✕</button>` : '';
+    const localBadge = isLocal ? `<span class="local-badge">local</span>` : '';
+    const key = t._key;
+    const savedNote = notes[key] || '';
+    const ctxMap = getAllContexts();
+    const savedContext = ctxMap[key] !== undefined ? ctxMap[key] : (t.context || '');
+    const ttMap = getAllTaskTexts();
+    const savedTaskText = ttMap[key] !== undefined ? ttMap[key] : (t.task || '');
+    const checked = t._done ? 'checked' : '';
+    tb.innerHTML += `<tr style="${t._done ? 'opacity:.45' : ''}">
+      <td style="text-align:center;padding-left:14px"><input type="checkbox" class="task-check" ${checked} onchange="toggleComplete('${key}', ${isLocal}, ${localIdx})"></td>
+      <td style="padding:6px 10px"><textarea class="task-notes task-tasktext" data-key="${key}" rows="2">${savedTaskText}</textarea>${localBadge}</td>
+      <td><span class="${ownerClass}">${ownerLabel}</span></td>
+      <td style="padding:6px 10px;min-width:280px"><textarea class="task-notes" data-key="${key}" placeholder="Add notes..." rows="2">${savedNote}</textarea></td>
+      <td style="padding:6px 10px;min-width:140px"><div style="display:flex;align-items:flex-start;gap:6px"><textarea class="task-notes task-context" data-key="${key}" placeholder="Add context..." rows="2">${savedContext}</textarea>${deleteBtn}</div></td>
+    </tr>`;
+  });
+
+  tb.querySelectorAll('.task-notes:not(.task-context)').forEach(el => {
+    el.addEventListener('blur', () => saveNote(el.dataset.key, el.value));
+    el.addEventListener('input', () => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; });
+  });
+  tb.querySelectorAll('.task-context').forEach(el => {
+    el.addEventListener('blur', () => saveContext(el.dataset.key, el.value));
+    el.addEventListener('input', () => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; });
+  });
+  tb.querySelectorAll('.task-tasktext').forEach(el => {
+    el.addEventListener('blur', () => saveTaskText(el.dataset.key, el.value));
+    el.addEventListener('input', () => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; });
+  });
+}
+
+function deleteLocalTask(idx) {
+  const arr = getLocalTasks();
+  arr.splice(idx, 1);
+  saveLocalTasks(arr);
+  renderTasks();
+}
+
+renderTasks();
+
+// Modal
+const overlay = document.getElementById('modalOverlay');
+document.getElementById('openModal').onclick = () => overlay.classList.add('open');
+document.getElementById('modalCancel').onclick = () => overlay.classList.remove('open');
+overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+
+document.getElementById('modalSave').onclick = () => {
+  const task = document.getElementById('f-task').value.trim();
+  if (!task) { document.getElementById('f-task').focus(); return; }
+  const newTask = {
+    priority: document.getElementById('f-priority').value,
+    task,
+    owner: document.getElementById('f-owner').value,
+    due: document.getElementById('f-due').value.trim() || 'TBD',
+    context: document.getElementById('f-context').value.trim(),
+    done: false,
+  };
+  const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+  arr.push(newTask);
+  saveLocalTasks(arr);
+  renderTasks();
+  overlay.classList.remove('open');
+  ['f-task','f-due','f-context'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-priority').value = 'high';
+  document.getElementById('f-owner').value = 'momentum';
+};
+
+// Ideas
+document.getElementById('ideaCount').textContent = DATA.ideas.length + ' initiatives';
+const ig = document.getElementById('ideasGrid');
+DATA.ideas.forEach(idea => {
+  ig.innerHTML += `<div class="idea-card">
+    <div class="idea-num">${idea.num}</div>
+    <div class="idea-title">${idea.title}</div>
+    <div class="idea-desc">${idea.desc}</div>
+    <div class="idea-footer">
+      <span class="status-badge">★ Momentum</span>
+      <span class="mode-tag">${idea.mode}</span>
+    </div>
+  </div>`;
+});
+
+// People
+const pg = document.getElementById('peopleGrid');
+DATA.people.forEach(p => {
+  pg.innerHTML += `<div class="person-card">
+    <div class="person-name">${p.name}</div>
+    <div class="person-role">${p.role}</div>
+    <div class="person-detail">${p.detail}</div>
+    ${p.contact ? `<div class="person-contact">${p.contact}</div>` : ''}
+  </div>`;
+});
+</script>
+</body>
+</html>

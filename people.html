@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>People — Mortell-Miller</title>
+<style>
+  :root {
+    --bg: #0E1117; --surface: #161B27; --surface2: #1E2535; --surface3: #252D40;
+    --accent: #4A9EDB; --accent-dim: #1D3A57;
+    --green: #2ECC71; --green-dim: #0D3320; --green-badge: #163D25;
+    --amber: #F0A500; --border: #2A3248; --text: #E8ECF4; --muted: #E8ECF4; --muted2: #C8D0E0; --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; }
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+  .nav-title { color: var(--white); font-size: 18px; font-weight: 700; letter-spacing: .3px; }
+  .nav-title span { color: var(--muted); font-weight: 400; }
+  .nav-links { display: flex; gap: 6px; }
+  .nav-links a { color: var(--green); text-decoration: none; font-size: 13px; padding: 5px 12px; border-radius: 4px; border: 1px solid rgba(46,204,113,.3); transition: all .15s; }
+  .nav-links a:hover { background: var(--green-dim); border-color: var(--green); }
+  .nav-links a.active { background: var(--green-dim); border-color: var(--green); }
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+  .section-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .section-hdr h2 { font-size: 16px; font-weight: 700; color: var(--text); }
+  .section-hdr .count { background: var(--surface3); color: var(--muted); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+  .people-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .person-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; transition: transform .15s, box-shadow .15s; }
+  .person-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+  .person-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .person-role { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .person-detail { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .person-contact { margin-top: 10px; font-size: 12px; color: var(--accent); line-height: 1.5; }
+  footer { text-align: center; padding: 24px; color: var(--muted2); font-size: 12px; border-top: 1px solid var(--border); margin-top: 12px; background: var(--surface); }
+  @media(max-width: 600px) { nav { padding: 12px 16px; } .container { padding: 16px; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-title" style="text-decoration:none;color:var(--white)">Mortell-Miller <span>Collab Notebook</span></a>
+  <div style="display:flex;align-items:center;gap:20px">
+    <div class="nav-links">
+      <a href="tasks.html">Tasks</a>
+      <a href="momentum.html">★ Momentum</a>
+      <a href="ideas.html">Ideas</a>
+      <a href="people.html" class="active">People</a>
+      <a href="docs.html">Docs</a>
+    </div>
+    <div style="color:var(--muted2);font-size:12px">Updated May 31, 2026</div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="section-hdr">
+    <h2>Key People</h2>
+    <span class="count" id="peopleCount"></span>
+  </div>
+  <div class="people-grid" id="peopleGrid"></div>
+</div>
+
+<footer>Mortell-Miller Collab Notebook &nbsp;·&nbsp; Updated via GitHub &nbsp;·&nbsp; Private</footer>
+
+<script>
+const PEOPLE = [
+  { name: "Art Mortell", role: "Partner · Author · Speaker · Mentor (86)", detail: "11 books. 4,000+ presentations (IBM, Merrill Lynch, Morgan Stanley). Methodology: failure as feedback, rejection as depersonalization, momentum through discipline.", contact: "art@artmortell.com · 805-351-0503 · artmortell.com" },
+  { name: "Danielle Segovia", role: "Momentum Work — Individual Employment Services", detail: "Primary contact at Momentum. Led Mike's engagement. Aligned with two-track framework as of May 22.", contact: "" },
+  { name: "Allison Poe", role: "Momentum Work — Team", detail: "Part of the core Momentum team. Aligned with Mike's two-track framework.", contact: "" },
+  { name: "Peter", role: "Momentum Work — Employment Coordinator", detail: "Same role as Danielle/Allison. Was in earlier meetings. Art proposed Peter as part of a Jack + Mike + Peter triad.", contact: "" },
+  { name: "Jack", role: "Momentum Work Client — Priority", detail: "Early 20s. Neuro/autism. Took ML classes at Channel Islands University. Can build AI systems but doesn't know how to apply them practically. Mike's analogy: knows how to build the car engine, doesn't know how to drive it.", contact: "" },
+  { name: "Anthony Barton", role: "Art's Mentee · Greater Purposes Co-Founder", detail: "Sold a business for $2.5M after Art's guidance. Travels the world serving underserved populations — Uganda, Malawi, Swaziland, Sierra Leone (annual). Has a 5-minute documentary trailer. Blair Underwood is attached.", contact: "310-890-3278 · (Do not contact without Art's direction)" },
+  { name: "Jerry Cox", role: "Total Training Network · Greater Purposes Co-Founder", detail: "Former president of Total Training Network (BI Worldwide). Brought Art in for $10K engagements in Cleveland and Minneapolis. Has video recordings and interview of Art — reportedly in the cloud.", contact: "612-327-6190 · (Do not contact without Art's direction)" },
+  { name: "Blair Underwood", role: "TV Actor · Project Connection", detail: "Enamored with Anthony Barton's Sierra Leone documentary trailer. Has connections at Amazon TV and Apple TV. Interested in replacing Anthony Bourdain with an Anthony Barton-style humanitarian travel show.", contact: "" },
+  { name: "Heather & Ryan O'Quinn", role: "Damascus Productions", detail: "Faith-based film production company, Westlake/Burbank area, near Oaks Christian. Subsidiary of Simonds. Were involved in the Anthony Barton / Sierra Leone project. Art has met with them 4+ times. Boss Chris may have a prior relationship.", contact: "Damascus Productions · Simonds parent company" },
+  { name: "Mike Lawrence", role: "AI Educator — Queens, NY", detail: "Teaching at Queensboro Community College. Transitioning students from coding to AI. Art has made an introduction. Possible collaboration / Spark AI connection.", contact: "" },
+];
+
+document.getElementById('peopleCount').textContent = PEOPLE.length + ' people';
+const pg = document.getElementById('peopleGrid');
+PEOPLE.forEach(p => {
+  pg.innerHTML += `<div class="person-card">
+    <div class="person-name">${p.name}</div>
+    <div class="person-role">${p.role}</div>
+    <div class="person-detail">${p.detail}</div>
+    ${p.contact ? `<div class="person-contact">${p.contact}</div>` : ''}
+  </div>`;
+});
+</script>
+</body>
+</html>

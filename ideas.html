@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ideas — Mortell-Miller</title>
+<style>
+  :root {
+    --bg: #0E1117; --surface: #161B27; --surface2: #1E2535; --surface3: #252D40;
+    --accent: #4A9EDB; --accent-dim: #1D3A57;
+    --green: #2ECC71; --green-dim: #0D3320; --green-badge: #163D25;
+    --amber: #F0A500; --amber-dim: #3A2800;
+    --red: #E05252; --border: #2A3248; --text: #E8ECF4; --muted: #E8ECF4; --muted2: #C8D0E0; --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; }
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+  .nav-title { color: var(--white); font-size: 18px; font-weight: 700; letter-spacing: .3px; }
+  .nav-title span { color: var(--muted); font-weight: 400; }
+  .nav-links { display: flex; gap: 6px; }
+  .nav-links a { color: var(--green); text-decoration: none; font-size: 13px; padding: 5px 12px; border-radius: 4px; border: 1px solid rgba(46,204,113,.3); transition: all .15s; }
+  .nav-links a:hover { background: var(--green-dim); border-color: var(--green); }
+  .nav-links a.active { background: var(--green-dim); border-color: var(--green); }
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+  .section-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .section-hdr h2 { font-size: 16px; font-weight: 700; color: var(--text); }
+  .section-hdr .count { background: var(--surface3); color: var(--muted); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-btn { padding: 5px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--surface); color: var(--muted); font-size: 13px; cursor: pointer; transition: all .15s; font-weight: 500; }
+  .filter-btn:hover { border-color: var(--green); color: var(--green); }
+  .filter-btn.active { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+  .ideas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  .idea-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; border-top: 3px solid transparent; transition: transform .15s, box-shadow .15s; }
+  .idea-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+  .idea-card.status-active { border-top-color: var(--green); }
+  .idea-card.status-momentum { border-top-color: var(--green); }
+  .idea-card.status-queued { border-top-color: var(--accent); }
+  .idea-card.status-parked { border-top-color: var(--muted2); }
+  .idea-card.status-assigned { border-top-color: var(--amber); }
+  .idea-num { font-size: 11px; color: var(--muted2); font-weight: 600; margin-bottom: 4px; }
+  .idea-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.35; }
+  .idea-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+  .idea-footer { display: flex; align-items: center; justify-content: space-between; }
+  .status-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 10px; text-transform: uppercase; letter-spacing: .5px; }
+  .badge-active { background: var(--green-badge); color: var(--green); }
+  .badge-momentum { background: var(--green-badge); color: var(--green); }
+  .badge-queued { background: var(--accent-dim); color: var(--accent); }
+  .badge-parked { background: var(--surface3); color: var(--muted); }
+  .badge-assigned { background: var(--amber-dim); color: var(--amber); }
+  .mode-tag { font-size: 11px; color: var(--muted2); background: var(--surface3); padding: 2px 8px; border-radius: 8px; }
+  .hidden { display: none !important; }
+  footer { text-align: center; padding: 24px; color: var(--muted2); font-size: 12px; border-top: 1px solid var(--border); margin-top: 12px; background: var(--surface); }
+  @media(max-width: 600px) { nav { padding: 12px 16px; } .container { padding: 16px; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-title" style="text-decoration:none;color:var(--white)">Mortell-Miller <span>Collab Notebook</span></a>
+  <div style="display:flex;align-items:center;gap:20px">
+    <div class="nav-links">
+      <a href="tasks.html">Tasks</a>
+      <a href="momentum.html">★ Momentum</a>
+      <a href="ideas.html" class="active">Ideas</a>
+      <a href="people.html">People</a>
+      <a href="docs.html">Docs</a>
+    </div>
+    <div style="color:var(--muted2);font-size:12px">Updated May 31, 2026</div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="section-hdr">
+    <h2>The 20-Idea Board</h2>
+    <span class="count" id="ideaCount"></span>
+  </div>
+  <div class="filter-bar" id="filterBar"></div>
+  <div class="ideas-grid" id="ideasGrid"></div>
+</div>
+
+<footer>Mortell-Miller Collab Notebook &nbsp;·&nbsp; Updated via GitHub &nbsp;·&nbsp; Private</footer>
+
+<script>
+const IDEAS = [
+  { num: "PRIORITY", title: "Jack's Real-World AI Project", desc: "Jack builds a real RAG deployment for a Ventura-area business. Mike guides. Momentum supports. Jack walks away with a portfolio piece.", status: "momentum", mode: "Mike Leads" },
+  { num: "PRIORITY", title: "Momentum Work AI Workshops", desc: "Broader AI curriculum for Momentum Work clients — separate scope, timeline, and funding from Jack's individual track.", status: "momentum", mode: "Mike Leads" },
+  { num: "Idea 1", title: "Art's Methodology for AI Learning", desc: "Training package built around Art's failure/rejection/discipline method applied to how people learn AI. First joint product.", status: "assigned", mode: "Equal Partners" },
+  { num: "Idea 2", title: "Mike Carries Art's Legacy", desc: "Mike becomes a caretaker of Art's work — presenting it in Mike's own voice. Art named this separately when Mike used the phrase 'legacy companion.'", status: "active", mode: "Mike Leads" },
+  { num: "Idea 3", title: "Art Legacy AI Knowledge System", desc: "All of Art's books, speeches, interviews synthesized into a queryable AI system — built around his documented principles, not a simulation of Art the person.", status: "active", mode: "Mike Leads" },
+  { num: "Idea 4", title: "Mike Presents Art's Lectures", desc: "Mike studies Art's material deeply, then presents Art's lectures — reducing Art's personal lecture load over time. Art numbered this explicitly.", status: "active", mode: "Mike Leads / Art Mentors" },
+  { num: "Idea 5", title: "Art as Speaker — Ventura Events", desc: "Position Art as a speaker for Ventura Chamber or similar events. Side point raised on call.", status: "queued", mode: "Mike Leads" },
+  { num: "Idea 6", title: "Structured Onboarding Interview", desc: "Recorded interview with Art using prepared questions to extract method, principles, stories, and decision frameworks. Art said: 'I'm ready.'", status: "active", mode: "Equal Partners" },
+  { num: "Idea 7", title: "Amazon / Tom Hopkins IP Issue", desc: "Tom Hopkins (Art's student 1969) is credited for Art's IP on Amazon merch. Explore contacting Amazon to correct attribution and replace with Art-attributed product line.", status: "queued", mode: "Mike Leads" },
+  { num: "Idea 8", title: "Intern / Support Person", desc: "Find an intern — possibly through Momentum — to help Mike manage and accelerate the methodology project. Art offered to pay at least minimum wage.", status: "queued", mode: "Art Supports" },
+  { num: "Idea 9", title: "Recover & Digitize Art's 8 Beta Tapes", desc: "8 beta tapes from a 1975 training program (via Ed Heron). Mike to locate beta machine. Tape 8 is the first test transfer. Art has physical possession.", status: "active", mode: "Mike Leads" },
+  { num: "Idea 10", title: "Update 1975 Training Into New Product", desc: "Once tapes are transferred, Art records updates and commentary — turning the old training into a current product. Dependent on Idea 9.", status: "queued", mode: "Equal Partners" },
+  { num: "Idea 11", title: "Mike as Agent / Manager for Capable People", desc: "Mike represents technically capable people who need help turning their aptitude into paid work. Jack is a possible first case. Art's words: 'This is your baby.'", status: "active", mode: "Mike's Business" },
+  { num: "Idea 12", title: "Anthony Barton Documentary", desc: "Reignite the stalled Blair Underwood / Amazon-Apple / Damascus Productions project. Anthony travels the world serving the least of us — Sierra Leone focus. Art believes Mike has 'catalyst competency' to restart this.", status: "queued", mode: "Mike as Catalyst" },
+  { num: "Idea 13", title: "Jerry Cox Video Archive", desc: "Recover Art's Total Training Network videos (Cleveland, Minneapolis engagements + interview) from the cloud via Jerry Cox. Integrate into Legacy AI system.", status: "queued", mode: "Mike Leads" },
+];
+
+document.getElementById('ideaCount').textContent = IDEAS.length + ' ideas';
+
+const statuses = ['all','momentum','active','assigned','queued','parked'];
+const labels = {all:'All',momentum:'★ Momentum',active:'Active',assigned:'Assigned',queued:'Queued',parked:'Parked'};
+const fb = document.getElementById('filterBar');
+statuses.forEach(s => {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn' + (s==='all'?' active':'');
+  btn.textContent = labels[s]; btn.dataset.filter = s;
+  btn.onclick = () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.idea-card').forEach(card => {
+      card.classList.toggle('hidden', s!=='all' && card.dataset.status!==s);
+    });
+  };
+  fb.appendChild(btn);
+});
+
+const badgeClass = {momentum:'badge-momentum',active:'badge-active',assigned:'badge-assigned',queued:'badge-queued',parked:'badge-parked'};
+const badgeLabel = {momentum:'★ Momentum',active:'Active',assigned:'Assigned',queued:'Queued',parked:'Parked'};
+const ig = document.getElementById('ideasGrid');
+IDEAS.forEach(idea => {
+  ig.innerHTML += `<div class="idea-card status-${idea.status}" data-status="${idea.status}">
+    <div class="idea-num">${idea.num}</div>
+    <div class="idea-title">${idea.title}</div>
+    <div class="idea-desc">${idea.desc}</div>
+    <div class="idea-footer">
+      <span class="status-badge ${badgeClass[idea.status]}">${badgeLabel[idea.status]}</span>
+      <span class="mode-tag">${idea.mode}</span>
+    </div>
+  </div>`;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archive — Mortell-Miller</title>
+<style>
+  :root {
+    --bg: #0E1117; --surface: #161B27; --surface2: #1E2535; --surface3: #252D40;
+    --accent: #4A9EDB; --accent-dim: #1D3A57;
+    --green: #2ECC71; --green-dim: #0D3320; --green-badge: #163D25;
+    --amber: #F0A500; --amber-dim: #3A2800;
+    --red: #E05252; --red-dim: #3A1010;
+    --border: #2A3248; --text: #E8ECF4; --muted: #E8ECF4; --muted2: #C8D0E0; --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; }
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+  .nav-title { color: var(--white); font-size: 18px; font-weight: 700; letter-spacing: .3px; }
+  .nav-title span { color: var(--muted2); font-weight: 400; }
+  .nav-links { display: flex; gap: 6px; }
+  .nav-links a { color: var(--green); text-decoration: none; font-size: 13px; padding: 5px 12px; border-radius: 4px; border: 1px solid rgba(46,204,113,.3); transition: all .15s; }
+  .nav-links a:hover { background: var(--green-dim); border-color: var(--green); }
+  .nav-links a.active { background: var(--amber-dim); border-color: var(--amber); color: var(--amber); }
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+  .page-header { background: var(--amber-dim); border: 1px solid rgba(240,165,0,.25); border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .page-header h1 { font-size: 18px; font-weight: 700; color: var(--amber); display: flex; align-items: center; gap: 8px; }
+  .page-header p { font-size: 13px; color: var(--muted2); margin-top: 4px; }
+  .btn-back { background: transparent; color: var(--amber); border: 1.5px solid rgba(240,165,0,.4); border-radius: 6px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all .15s; white-space: nowrap; }
+  .btn-back:hover { background: var(--amber-dim); border-color: var(--amber); }
+  .section-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .section-hdr h2 { font-size: 16px; font-weight: 700; color: var(--text); }
+  .section-hdr .count { background: var(--surface3); color: var(--muted2); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+  .empty-state { text-align: center; padding: 60px 24px; color: var(--muted2); font-size: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+  .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+  .tasks-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  .tasks-table th { background: var(--surface2); color: var(--muted2); text-align: left; padding: 11px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
+  .tasks-table td { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: top; color: var(--text); opacity: .7; }
+  .tasks-table tr:last-child td { border-bottom: none; }
+  .tasks-table tr:hover td { background: var(--surface2); opacity: 1; }
+  .owner-mike { background: var(--accent-dim); color: var(--accent); padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .owner-art { background: #2D1A4A; color: #B07EE8; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .owner-momentum { background: var(--green-badge); color: var(--green); padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .task-done { text-decoration: line-through; color: var(--muted2); }
+  .task-check { appearance: none; -webkit-appearance: none; width: 16px; height: 16px; border: 1.5px solid var(--green); border-radius: 4px; background: var(--green); cursor: pointer; position: relative; flex-shrink: 0; transition: all .15s; }
+  .task-check::after { content: '✓'; position: absolute; top: -1px; left: 2px; font-size: 11px; color: #0D3320; font-weight: 700; }
+  .task-check:hover { background: transparent; border-color: var(--border); }
+  .task-check:hover::after { display: none; }
+  .btn-restore { background: none; border: 1px solid var(--border); border-radius: 5px; color: var(--muted2); cursor: pointer; font-size: 12px; padding: 3px 9px; transition: all .15s; white-space: nowrap; }
+  .btn-restore:hover { border-color: var(--green); color: var(--green); }
+  footer { text-align: center; padding: 24px; color: var(--muted2); font-size: 12px; border-top: 1px solid var(--border); margin-top: 12px; background: var(--surface); }
+  @media(max-width: 600px) { nav { padding: 12px 16px; } .container { padding: 16px; } .tasks-table th, .tasks-table td { padding: 9px 11px; font-size: 13px; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-title" style="text-decoration:none;color:var(--white)">Mortell-Miller <span>Collab Notebook</span></a>
+  <div style="display:flex;align-items:center;gap:20px">
+    <div class="nav-links">
+      <a href="tasks.html">Tasks</a>
+      <a href="momentum.html">★ Momentum</a>
+      <a href="ideas.html">Ideas</a>
+      <a href="people.html">People</a>
+      <a href="docs.html">Docs</a>
+      <a href="archive.html" class="active">📦 Archive</a>
+    </div>
+    <div style="color:var(--muted2);font-size:12px">Updated May 31, 2026</div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="page-header">
+    <div>
+      <h1>📦 Completed Tasks</h1>
+      <p>Tasks that have been checked off. Uncheck any task to move it back to active.</p>
+    </div>
+    <a href="tasks.html" class="btn-back">← Back to Tasks</a>
+  </div>
+
+  <div class="section-hdr">
+    <h2>Archive</h2>
+    <span class="count" id="archiveCount"></span>
+  </div>
+
+  <div id="emptyState" class="empty-state hidden">
+    <div class="icon">✅</div>
+    <div>No completed tasks yet.<br>Check off a task on the <a href="tasks.html" style="color:var(--green)">Tasks page</a> and it will appear here.</div>
+  </div>
+
+  <table class="tasks-table" id="archiveTable">
+    <thead>
+      <tr>
+        <th style="width:36px"></th>
+        <th>Task</th>
+        <th>Owner</th>
+        <th>Notes</th>
+        <th>Context</th>
+        <th style="width:110px"></th>
+      </tr>
+    </thead>
+    <tbody id="archiveBody"></tbody>
+  </table>
+
+</div>
+
+<footer>Mortell-Miller Collab Notebook &nbsp;·&nbsp; Updated via GitHub &nbsp;·&nbsp; Private</footer>
+
+<script>
+const DATA_TASKS = [
+  { priority: "high", task: "Email Art: 1-paragraph concept for Idea #1 (Art's Methodology for AI Learning) + title", owner: "mike", due: "Sun June 1", context: "Draft tonight, sleep on it, revise in morning", done: false },
+  { priority: "high", task: "Email Art: forward the AI-generated Art Mortell thesis summary", owner: "mike", due: "Sun June 1", context: "Cut & paste from Claude session output", done: false },
+  { priority: "high", task: "Contact Danielle — transparency note before any Jack-related action", owner: "mike", due: "Before Fri June 5", context: "Art & Mike side projects must be disclosed; clear separation from Jack track", done: false },
+  { priority: "high", task: "Locate beta machine for 1975 tape transfer", owner: "mike", due: "Mon June 2", context: "Art says Ronnie couldn't find one — Mike says he can. Tape 8 is first test.", done: false },
+  { priority: "high", task: "Send bio to Art (formal PDF + casual bio)", owner: "mike", due: "Done ✓", context: "Sent May 31", done: true },
+  { priority: "med", task: "Send photos of beta tape 8 case and packaging", owner: "art", due: "Soon", context: "Via Catalina's email — Art has all 8 tapes in physical possession", done: false },
+  { priority: "med", task: "Read one narrative/chapter from Art's book per night; take notes on extraction candidates", owner: "mike", due: "Ongoing", context: "Art pointed Mike to Anthony Barton's narrative first. Notes feed the AI knowledge system.", done: false },
+  { priority: "med", task: "Watch 5-minute Anthony Barton / Sierra Leone documentary trailer", owner: "mike", due: "This week", context: "Art emailed it. Form view on whether/how to reignite the Blair Underwood / Damascus / Amazon project.", done: false },
+  { priority: "med", task: "Research Damascus Productions (Heather & Ryan O'Quinn)", owner: "mike", due: "This week", context: "Faith-based film company, Westlake/Burbank, subsidiary of Simonds. Check with boss Chris — possible prior relationship.", done: false },
+  { priority: "med", task: "Create partnership architecture sketch to bring to lunch", owner: "mike", due: "Before lunch", context: "Art's request: the spokes, the model, the atoms. Compensation baked in. Done — v2 filed.", done: true },
+  { priority: "med", task: "Prepare structured onboarding interview questions for Art", owner: "mike", due: "This week", context: "On camera or recorded. Art said 'I'm ready.' Feeds Legacy AI knowledge system.", done: false },
+  { priority: "med", task: "Brief Jack informally before any group meeting", owner: "momentum", due: "Before Fri June 5", context: "Danielle & Allison to approach Jack first. Mike available for face-to-face when Jack is ready.", done: false },
+  { priority: "low", task: "Schedule lunch — Luna Grill or Cheesecake Factory", owner: "mike", due: "Tue or Wed this week", context: "Art has dental Mon, grandson Tue lunch — Wednesday most likely. 1 hour min to finish 20-idea list.", done: false },
+  { priority: "low", task: "Strategize Jerry Cox contact approach with Art before reaching out", owner: "mike", due: "At lunch", context: "Jerry Cox (612-327-6190) — Total Training Network videos of Art in the cloud. Do not call yet.", done: false },
+];
+
+const LOCAL_KEY = 'mm_hub_tasks';
+const NOTES_KEY = 'mm_hub_notes';
+const CONTEXT_KEY = 'mm_hub_context';
+const COMPLETE_KEY = 'mm_hub_complete';
+
+function getLocalTasks() {
+  try { return (JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]')).map((t,i) => ({...t, _local:true, _idx:i})); }
+  catch(e) { return []; }
+}
+function saveLocalTasks(arr) { localStorage.setItem(LOCAL_KEY, JSON.stringify(arr)); }
+function getAllNotes() { try { return JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); } catch(e) { return {}; } }
+function getAllContexts() { try { return JSON.parse(localStorage.getItem(CONTEXT_KEY) || '{}'); } catch(e) { return {}; } }
+function getCompleted() { try { return JSON.parse(localStorage.getItem(COMPLETE_KEY) || '{}'); } catch(e) { return {}; } }
+function setCompleted(k, v) { const c = getCompleted(); c[k] = v; localStorage.setItem(COMPLETE_KEY, JSON.stringify(c)); }
+
+function restoreTask(key, isLocal, localIdx) {
+  // Remove from completed store
+  const c = getCompleted();
+  delete c[key];
+  localStorage.setItem(COMPLETE_KEY, JSON.stringify(c));
+  // If local task, also update its done flag
+  if (isLocal) {
+    const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+    if (arr[localIdx]) { arr[localIdx].done = false; saveLocalTasks(arr); }
+  }
+  renderArchive();
+}
+
+function renderArchive() {
+  const tb = document.getElementById('archiveBody');
+  tb.innerHTML = '';
+  const localTasks = getLocalTasks();
+  const allTasks = [...DATA_TASKS, ...localTasks];
+  const completed = getCompleted();
+  const contexts = getAllContexts();
+  const notes = getAllNotes();
+
+  const resolved = allTasks.map((t, i) => {
+    const k = t._local ? 'local_' + t._idx : 'task_' + i;
+    return { ...t, _key: k, _done: t.done || !!completed[k] };
+  });
+
+  const done = resolved.filter(t => t._done);
+
+  const count = done.length;
+  document.getElementById('archiveCount').textContent = count + ' completed';
+
+  const table = document.getElementById('archiveTable');
+  const empty = document.getElementById('emptyState');
+
+  if (count === 0) {
+    table.style.display = 'none';
+    empty.classList.remove('hidden');
+    return;
+  }
+  table.style.display = '';
+  empty.classList.add('hidden');
+
+  done.forEach(t => {
+    const oc = { mike: 'owner-mike', art: 'owner-art', momentum: 'owner-momentum' }[t.owner] || 'owner-mike';
+    const ol = { mike: 'Mike', art: 'Art', momentum: 'Momentum' }[t.owner] || t.owner;
+    const isLocal = !!t._local;
+    const li = isLocal ? t._idx : -1;
+    const savedContext = contexts[t._key] !== undefined ? contexts[t._key] : (t.context || '');
+    const savedNote = notes[t._key] || '';
+
+    tb.innerHTML += `<tr>
+      <td style="text-align:center;padding-left:14px">
+        <input type="checkbox" class="task-check" checked title="Uncheck to restore" onchange="restoreTask('${t._key}', ${isLocal}, ${li})">
+      </td>
+      <td class="task-done">${t.task}</td>
+      <td><span class="${oc}">${ol}</span></td>
+      <td style="font-size:13px;color:var(--muted2);min-width:280px">${savedNote}</td>
+      <td style="font-size:13px;color:var(--muted2);min-width:140px">${savedContext}</td>
+      <td style="text-align:right;padding-right:14px">
+        <button class="btn-restore" onclick="restoreTask('${t._key}', ${isLocal}, ${li})">↩ Restore</button>
+      </td>
+    </tr>`;
+  });
+}
+
+renderArchive();
+</script>
+</body>
+</html>

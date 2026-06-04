@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docs — Mortell-Miller</title>
+<style>
+  :root {
+    --bg: #0E1117; --surface: #161B27; --surface2: #1E2535; --surface3: #252D40;
+    --accent: #4A9EDB; --accent-dim: #1D3A57;
+    --green: #2ECC71; --green-dim: #0D3320; --green-badge: #163D25;
+    --amber: #F0A500; --border: #2A3248; --text: #E8ECF4; --muted: #E8ECF4; --muted2: #C8D0E0; --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; }
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+  .nav-title { color: var(--white); font-size: 18px; font-weight: 700; letter-spacing: .3px; }
+  .nav-title span { color: var(--muted); font-weight: 400; }
+  .nav-links { display: flex; gap: 6px; }
+  .nav-links a { color: var(--green); text-decoration: none; font-size: 13px; padding: 5px 12px; border-radius: 4px; border: 1px solid rgba(46,204,113,.3); transition: all .15s; }
+  .nav-links a:hover { background: var(--green-dim); border-color: var(--green); }
+  .nav-links a.active { background: var(--green-dim); border-color: var(--green); }
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+  .section-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .section-hdr h2 { font-size: 16px; font-weight: 700; color: var(--text); }
+  .section-hdr .count { background: var(--surface3); color: var(--muted); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+  .docs-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .doc-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; display: flex; align-items: flex-start; gap: 12px; transition: transform .15s, box-shadow .15s; }
+  .doc-item:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+  .doc-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+  .doc-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .doc-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .doc-item a { text-decoration: none; color: inherit; }
+  .doc-item a:hover .doc-name { color: var(--green); }
+  footer { text-align: center; padding: 24px; color: var(--muted2); font-size: 12px; border-top: 1px solid var(--border); margin-top: 12px; background: var(--surface); }
+  @media(max-width: 600px) { nav { padding: 12px 16px; } .container { padding: 16px; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-title" style="text-decoration:none;color:var(--white)">Mortell-Miller <span>Collab Notebook</span></a>
+  <div style="display:flex;align-items:center;gap:20px">
+    <div class="nav-links">
+      <a href="tasks.html">Tasks</a>
+      <a href="momentum.html">★ Momentum</a>
+      <a href="ideas.html">Ideas</a>
+      <a href="people.html">People</a>
+      <a href="docs.html" class="active">Docs</a>
+    </div>
+    <div style="color:var(--muted2);font-size:12px">Updated May 31, 2026</div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="section-hdr">
+    <h2>Docs &amp; Resources</h2>
+    <span class="count" id="docsCount"></span>
+  </div>
+  <div class="docs-list" id="docsList"></div>
+</div>
+
+<footer>Mortell-Miller Collab Notebook &nbsp;·&nbsp; Updated via GitHub &nbsp;·&nbsp; Private</footer>
+
+<script>
+const DOCS = [
+  { icon: "📄", name: "Partnership Architecture v2", desc: "Two-track framework with Momentum first, project tracks, compensation — for lunch discussion", url: "" },
+  { icon: "📘", name: "Art Mortell — The Art of Life", desc: "Art's 2025 book. Mike has a signed copy. One narrative per night.", url: "" },
+  { icon: "📗", name: "The Courage to Fail (1992)", desc: "Art's McGraw-Hill book — full text analyzed. Foundation of his methodology.", url: "" },
+  { icon: "📋", name: "AI-Generated Art Mortell Thesis Summary", desc: "Claude's synthesis of Art's methodology and why it maps onto AI learning — send to Art", url: "" },
+  { icon: "🎥", name: "Anthony Barton Documentary Trailer (5 min)", desc: "Sent by Art via email. Blair Underwood attached. Amazon/Apple connections.", url: "" },
+  { icon: "🎞️", name: "Art Mortell YouTube Videos (1990s)", desc: "Pulled from YouTube and saved to Art Mortell folder — includes blonde-lady intro video ca. 1991-95", url: "" },
+  { icon: "🌐", name: "artmortell.com", desc: "Art's website — one quote has been there for decades: 'Where the world changes around you, you gotta change the way you do business.'", url: "https://artmortell.com" },
+  { icon: "🎥", name: "Damascus Productions", desc: "Heather & Ryan O'Quinn — faith-based film company, Westlake/Burbank. Simonds parent.", url: "" },
+  { icon: "📁", name: "Project Files — VADER", desc: "All Art Mortell context docs at /Volumes/VADER/Cowork Projects/Art Mortell/", url: "" },
+];
+
+document.getElementById('docsCount').textContent = DOCS.length + ' resources';
+const dl = document.getElementById('docsList');
+DOCS.forEach(d => {
+  dl.innerHTML += `<div class="doc-item">
+    <div class="doc-icon">${d.icon}</div>
+    <div>${d.url
+      ? `<a href="${d.url}" target="_blank"><div class="doc-name">${d.name}</div></a>`
+      : `<div class="doc-name">${d.name}</div>`}
+    <div class="doc-desc">${d.desc}</div></div>
+  </div>`;
+});
+</script>
+</body>
+</html>

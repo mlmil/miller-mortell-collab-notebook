@@ -1,79 +1,96 @@
 # Mortell-Miller Collab Notebook
 
-A private, single-page dashboard for tracking the Art Mortell / Mike Miller collaboration — ideas, tasks, key contacts, and project docs. Momentum Work is the primary mission.
+A private, static HTML website for Art Mortell and Mike Miller — tracking tasks, ideas, projects, key people, and documents as the collaboration grows.
+
+Hosted via GitHub Pages. No server, no database, no login required. All task edits are saved locally in the browser (localStorage).
 
 ---
 
-## How to publish (first time)
+## Pages
 
-1. Create a new GitHub repository (suggested name: `collab-notebook`)
-2. Upload `index.html` and this `README.md` to the root of the repo
-3. Go to **Settings → Pages**
-4. Under **Source**, select `Deploy from a branch` → `main` → `/ (root)` → Save
-5. GitHub will give you a live URL within a minute or two: `https://yourusername.github.io/collab-notebook/`
-
----
-
-## How to update the site
-
-All content lives in the `DATA` object near the top of `index.html` — roughly line 140. Edit that block, save, and push. The site updates immediately.
-
-### Update the "last updated" date
-```js
-lastUpdated: "June 3, 2026",
-```
-
-### Add a task (permanent, visible to both)
-Add an entry to `DATA.tasks`:
-```js
-{ priority: "high", task: "Your task description", owner: "mike", due: "Mon June 3", context: "Any extra context", done: false },
-```
-- `priority`: `"high"` / `"med"` / `"low"`
-- `owner`: `"mike"` / `"art"` / `"momentum"`
-- `done`: set to `true` to mark complete (shows as strikethrough)
-
-### Mark a task done
-Change `done: false` to `done: true`.
-
-### Add an idea
-Add an entry to `DATA.ideas`:
-```js
-{ num: "Idea 14", title: "Your Idea Title", desc: "Short description.", status: "queued", mode: "Mike Leads" },
-```
-- `status`: `"momentum"` / `"active"` / `"assigned"` / `"queued"` / `"parked"`
-
-### Add a person
-Add an entry to `DATA.people`:
-```js
-{ name: "Full Name", role: "Title / Role", detail: "Brief description.", contact: "email or phone" },
-```
-
-### Add a doc or link
-Add an entry to `DATA.docs`:
-```js
-{ icon: "📄", name: "Document Name", desc: "What it is.", url: "https://link-if-applicable" },
-```
-
-### Update the Momentum Work status cards
-Edit entries in `DATA.momentum`:
-```js
-{ label: "Jack Status", value: "Updated status here", sub: "Sub-detail line" },
-```
+| File | Purpose |
+|------|---------|
+| `index.html` | Home/landing page with links to all sections |
+| `tasks.html` | Task & assignment tracker with editable fields |
+| `momentum.html` | Dedicated Momentum Work page — Jack's project, workshops, Momentum team |
+| `ideas.html` | The 20-Idea Board with status filters |
+| `people.html` | Key people in the network |
+| `docs.html` | Docs, books, videos, and file references |
+| `archive.html` | Completed tasks — check off a task on Tasks page to send it here |
 
 ---
 
-## New Task button
+## How to Update Content
 
-The **New Task** button in the Tasks section lets you add tasks on the fly without editing the file. These save to your browser's local storage — they're visible on your device only and won't push to GitHub. To make a task permanent and shared, add it to `DATA.tasks` in `index.html` and push.
+All data lives in the `DATA` or `DATA_TASKS` JavaScript object near the top of each HTML file — clearly marked with comments. No build tools, no dependencies.
+
+### Adding or editing a task (tasks.html)
+Find the `DATA_TASKS` array and add/edit an entry:
+```js
+{ priority: "high", task: "Your task description", owner: "mike", due: "Fri June 6", context: "Optional context", done: false }
+```
+- `priority`: `high` | `med` | `low`
+- `owner`: `mike` | `art` | `momentum`
+- `done`: set to `true` to pre-populate the archive
+
+### Adding a Momentum task (momentum.html)
+Same format inside the `DATA.tasks` array in `momentum.html`.
+
+### Adding an idea (ideas.html)
+Find the `IDEAS` array:
+```js
+{ num: "Idea 14", title: "Your Idea Title", desc: "Description.", status: "queued", mode: "Mike Leads" }
+```
+- `status`: `momentum` | `active` | `assigned` | `queued` | `parked`
+
+### Adding a person (people.html)
+Find the `PEOPLE` array:
+```js
+{ name: "Full Name", role: "Title / Role", detail: "Background notes.", contact: "email · phone" }
+```
+
+### Adding a doc (docs.html)
+Find the `DOCS` array:
+```js
+{ icon: "📄", name: "Document Name", desc: "Short description.", url: "https://..." }
+```
+Leave `url` as `""` if there's no link.
 
 ---
 
-## File structure
+## How Editing Works (Browser)
 
-```
-/
-├── index.html   — the entire site (edit DATA block to update content)
-└── README.md    — this file
-```
+On the Tasks and Momentum pages, three columns are editable directly in the browser:
 
-No build step. No dependencies. No server. Just push and it's live.
+- **Task** — click to edit the task text
+- **Notes** — free-form working notes
+- **Context** — background or reference info
+
+All edits save automatically on blur (when you click away) and persist in `localStorage`. They survive page refreshes but are browser-specific — edits made on one device won't appear on another. For shared updates, edit the source HTML and push to GitHub.
+
+---
+
+## Archive
+
+When a task is checked off on `tasks.html`, it disappears from the active list and appears on `archive.html`. To restore a task, uncheck it or click **↩ Restore** on the archive page.
+
+---
+
+## Deployment
+
+1. Edit the HTML files directly
+2. Commit and push to GitHub
+3. GitHub Pages serves the site automatically from the repo root
+
+All 7 files must stay in the same directory for navigation links to work correctly.
+
+---
+
+## File Locations
+
+- **Repo / website files:** `Mortell-MIller WEbsite/`
+- **Project context docs:** `/Volumes/VADER/Projects/Momentum Work, INC/Momentum_Art Mortell/`
+
+---
+
+*Private — Mortell-Miller Collaboration · Updated June 2026*

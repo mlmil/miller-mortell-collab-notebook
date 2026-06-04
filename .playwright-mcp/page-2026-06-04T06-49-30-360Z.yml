@@ -1,0 +1,50 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - heading "Superpowers Brainstorming" [level=1] [ref=e3]:
+      - link "Superpowers Brainstorming" [ref=e4] [cursor=pointer]:
+        - /url: https://github.com/obra/superpowers
+    - generic [ref=e5]: Connected
+  - generic [ref=e7]:
+    - heading "What kind of revision does this page need?" [level=2] [ref=e8]
+    - paragraph [ref=e9]: I found a compact single-page dashboard with tasks, ideas, people, docs, and a Momentum status banner. Pick the closest target.
+    - generic [ref=e10]:
+      - generic [ref=e11] [cursor=pointer]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: Content Refresh
+          - generic [ref=e15]:
+            - generic [ref=e16]: Mortell-Miller Collab Notebook
+            - generic [ref=e17]: Updated dates, task wording, priorities
+            - generic [ref=e18]: Cleaned idea board language
+            - generic [ref=e19]: People and docs brought current
+        - generic [ref=e20]:
+          - heading "A. Content Refresh" [level=3] [ref=e21]
+          - paragraph [ref=e22]: Keep the current layout. Update copy, dates, task status, idea wording, and project boundaries.
+      - generic [ref=e23] [cursor=pointer]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: Executive Brief
+          - generic [ref=e27]:
+            - generic [ref=e28]: Current State | Next Moves | Open Loops
+            - generic [ref=e29]:
+              - generic [ref=e30]: Top priorities
+              - generic [ref=e31]: Who owns what
+            - generic [ref=e32]: Decision list for next meeting
+        - generic [ref=e33]:
+          - heading "B. Executive Brief" [level=3] [ref=e34]
+          - paragraph [ref=e35]: "Reshape the page so Art or Mike can scan the state of play fast: priorities first, details lower down."
+      - generic [ref=e36] [cursor=pointer]:
+        - generic [ref=e38]:
+          - generic [ref=e39]: Visual Redesign
+          - generic [ref=e40]:
+            - generic [ref=e41]: Cleaner workspace navigation
+            - generic [ref=e42]: More readable intro and status band
+            - generic [ref=e43]:
+              - generic [ref=e44]: Task panel
+              - generic [ref=e45]: Idea panel
+        - generic [ref=e46]:
+          - heading "C. Visual Redesign" [level=3] [ref=e47]
+          - paragraph [ref=e48]: Improve hierarchy, spacing, mobile behavior, and polish while preserving the single-file static setup.
+    - paragraph [ref=e50]:
+      - text: Current page preview is also running at
+      - strong [ref=e51]: http://localhost:8061
+      - text: .
+  - generic [ref=e52]: Click an option above, then return to the terminal

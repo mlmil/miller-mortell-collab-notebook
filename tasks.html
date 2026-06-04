@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tasks — Mortell-Miller</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   :root {
     --bg: #0E1117; --surface: #161B27; --surface2: #1E2535; --surface3: #252D40;
@@ -162,6 +163,13 @@
 <footer>Mortell-Miller Collab Notebook &nbsp;·&nbsp; Updated via GitHub &nbsp;·&nbsp; Private</footer>
 
 <script>
+// ── EmailJS ─────────────────────────────────────────────
+emailjs.init('k-esWiB8fdOLrQVtU');
+
+function notify(message) {
+  emailjs.send('service_judyvsj', 'template_kp88abe', { message });
+}
+
 // ── Firebase config ─────────────────────────────────────
 const DB_URL = 'https://mortell-miller-web-site-default-rtdb.firebaseio.com/tasks.json';
 
@@ -215,13 +223,17 @@ function setSaveStatus(msg) {
 }
 
 function toggleComplete(idx) {
+  const label = tasks[idx].task;
   tasks[idx].done = true;
+  notify('✅ Task completed:\n\n' + label);
   saveTasks();
   renderTasks();
 }
 
 function deleteTask(idx) {
+  const label = tasks[idx].task;
   tasks.splice(idx, 1);
+  notify('🗑️ Task deleted:\n\n' + label);
   saveTasks();
   renderTasks();
 }
@@ -329,6 +341,7 @@ document.getElementById('modalSave').onclick = () => {
     notes: '',
     done: false
   });
+  notify('➕ New task added:\n\n' + task);
   saveTasks();
   renderTasks();
   overlay.classList.remove('open');

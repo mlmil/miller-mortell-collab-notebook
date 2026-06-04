@@ -94,7 +94,6 @@
       <tr>
         <th style="width:36px"></th>
         <th>Task</th>
-        <th>Owner</th>
         <th>Notes</th>
         <th>Context</th>
         <th style="width:110px"></th>
@@ -127,55 +126,40 @@ const DATA_TASKS = [
 
 const LOCAL_KEY = 'mm_hub_tasks';
 const NOTES_KEY = 'mm_hub_notes';
-const CONTEXT_KEY = 'mm_hub_context';
-const COMPLETE_KEY = 'mm_hub_complete';
+const DB_URL = 'https://mortell-miller-web-site-default-rtdb.firebaseio.com/tasks.json';
+let tasks = [];
 
-function getLocalTasks() {
-  try { return (JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]')).map((t,i) => ({...t, _local:true, _idx:i})); }
-  catch(e) { return []; }
+async function loadArchive() {
+  document.getElementById('archiveBody').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted2);font-size:16px">Loading...</td></tr>';
+  try {
+    const res = await fetch(DB_URL);
+    const data = await res.json();
+    tasks = Array.isArray(data) ? data : (data ? Object.values(data) : []);
+  } catch(e) { tasks = []; }
+  renderArchive();
 }
-function saveLocalTasks(arr) { localStorage.setItem(LOCAL_KEY, JSON.stringify(arr)); }
-function getAllNotes() { try { return JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); } catch(e) { return {}; } }
-function getAllContexts() { try { return JSON.parse(localStorage.getItem(CONTEXT_KEY) || '{}'); } catch(e) { return {}; } }
-function getCompleted() { try { return JSON.parse(localStorage.getItem(COMPLETE_KEY) || '{}'); } catch(e) { return {}; } }
-function setCompleted(k, v) { const c = getCompleted(); c[k] = v; localStorage.setItem(COMPLETE_KEY, JSON.stringify(c)); }
 
-function restoreTask(key, isLocal, localIdx) {
-  // Remove from completed store
-  const c = getCompleted();
-  delete c[key];
-  localStorage.setItem(COMPLETE_KEY, JSON.stringify(c));
-  // If local task, also update its done flag
-  if (isLocal) {
-    const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
-    if (arr[localIdx]) { arr[localIdx].done = false; saveLocalTasks(arr); }
-  }
+async function restoreTask(idx) {
+  tasks[idx].done = false;
+  await fetch(DB_URL, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(tasks)
+  });
   renderArchive();
 }
 
 function renderArchive() {
   const tb = document.getElementById('archiveBody');
   tb.innerHTML = '';
-  const localTasks = getLocalTasks();
-  const allTasks = [...DATA_TASKS, ...localTasks];
-  const completed = getCompleted();
-  const contexts = getAllContexts();
-  const notes = getAllNotes();
+  const done = tasks.map((t, i) => ({...t, _i: i})).filter(t => t.done);
 
-  const resolved = allTasks.map((t, i) => {
-    const k = t._local ? 'local_' + t._idx : 'task_' + i;
-    return { ...t, _key: k, _done: t.done || !!completed[k] };
-  });
-
-  const done = resolved.filter(t => t._done);
-
-  const count = done.length;
-  document.getElementById('archiveCount').textContent = count + ' completed';
+  document.getElementById('archiveCount').textContent = done.length + ' completed';
 
   const table = document.getElementById('archiveTable');
   const empty = document.getElementById('emptyState');
 
-  if (count === 0) {
+  if (done.length === 0) {
     table.style.display = 'none';
     empty.classList.remove('hidden');
     return;
@@ -184,29 +168,21 @@ function renderArchive() {
   empty.classList.add('hidden');
 
   done.forEach(t => {
-    const oc = { mike: 'owner-mike', art: 'owner-art', momentum: 'owner-momentum' }[t.owner] || 'owner-mike';
-    const ol = { mike: 'Mike', art: 'Art', momentum: 'Momentum' }[t.owner] || t.owner;
-    const isLocal = !!t._local;
-    const li = isLocal ? t._idx : -1;
-    const savedContext = contexts[t._key] !== undefined ? contexts[t._key] : (t.context || '');
-    const savedNote = notes[t._key] || '';
-
     tb.innerHTML += `<tr>
       <td style="text-align:center;padding-left:14px">
-        <input type="checkbox" class="task-check" checked title="Uncheck to restore" onchange="restoreTask('${t._key}', ${isLocal}, ${li})">
+        <input type="checkbox" class="task-check" checked title="Uncheck to restore" onchange="restoreTask(${t._i})">
       </td>
       <td class="task-done">${t.task}</td>
-      <td><span class="${oc}">${ol}</span></td>
-      <td style="font-size:13px;color:var(--muted2);min-width:280px">${savedNote}</td>
-      <td style="font-size:13px;color:var(--muted2);min-width:140px">${savedContext}</td>
+      <td style="font-size:15px;color:var(--muted2);min-width:280px">${t.notes||''}</td>
+      <td style="font-size:15px;color:var(--muted2);min-width:140px">${t.context||''}</td>
       <td style="text-align:right;padding-right:14px">
-        <button class="btn-restore" onclick="restoreTask('${t._key}', ${isLocal}, ${li})">↩ Restore</button>
+        <button class="btn-restore" onclick="restoreTask(${t._i})">↩ Restore</button>
       </td>
     </tr>`;
   });
 }
 
-renderArchive();
+loadArchive();
 </script>
 </body>
 </html>
